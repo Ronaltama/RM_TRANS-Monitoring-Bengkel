@@ -1,13 +1,16 @@
 import Vue from 'vue'
 import App from './App.vue'
 import router from './router'
-import axios from 'axios'
+import api from './services/api.js'
+import authService from './services/authService.js'
 
-// Set base URL for API calls
-axios.defaults.baseURL = '/api'
-axios.defaults.withCredentials = true
+// Set Authorization header on startup if token exists
+var token = authService.getToken()
+if (token) {
+  api.defaults.headers.common['Authorization'] = 'Bearer ' + token
+}
 
-Vue.prototype.$http = axios
+Vue.prototype.$http = api
 
 Vue.config.productionTip = false
 

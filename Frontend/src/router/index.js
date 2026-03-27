@@ -6,39 +6,43 @@ Vue.use(VueRouter)
 const routes = [
   {
     path: '/',
-    redirect: '/dashboard',
+    redirect: '/login'
   },
   {
     path: '/login',
     name: 'Login',
-    component: () => import('@/views/LoginView.vue'),
-    meta: { guest: true },
+    component: () => import('@/views/LoginView.vue')
   },
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: () => import('@/views/DashboardView.vue'),
-    meta: { requiresAuth: true },
+    component: () => import('@/views/DashboardView.vue')
   },
-  // Tambahkan route lain di sini
+  {
+    path: '/kendaraan',
+    name: 'Kendaraan',
+    component: () => import('@/views/KendaraanView.vue')
+  },
+  {
+    path: '/monitoring-kendaraan',
+    name: 'MonitoringKendaraan',
+    component: () => import('@/views/MonitoringKendaraanView.vue')
+  },
+  {
+    path: '/monitoring-kendaraan/:id',
+    name: 'VehicleDetail',
+    component: () => import('@/views/VehicleDetailView.vue')
+  },
+  {
+    path: '*',
+    redirect: '/dashboard'
+  }
 ]
 
 const router = new VueRouter({
   mode: 'history',
   base: '/',
-  routes,
-})
-
-// Navigation guard
-router.beforeEach((to, from, next) => {
-  const token = localStorage.getItem('token')
-  if (to.meta.requiresAuth && !token) {
-    next('/login')
-  } else if (to.meta.guest && token) {
-    next('/dashboard')
-  } else {
-    next()
-  }
+  routes
 })
 
 export default router
