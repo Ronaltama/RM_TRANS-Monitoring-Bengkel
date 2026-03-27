@@ -83,18 +83,6 @@ export default {
           iconBg: '#ede9fe', iconColor: '#7c3aed'
         },
         {
-          label: 'Total Supplier',
-          value: 8,
-          icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg>',
-          iconBg: '#e0e7ff', iconColor: '#4338ca'
-        },
-        {
-          label: 'Total Barang',
-          value: 47,
-          icon: '<svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 16V8a2 2 0 00-1-1.73l-7-4a2 2 0 00-2 0l-7 4A2 2 0 003 8v8a2 2 0 001 1.73l7 4a2 2 0 002 0l7-4A2 2 0 0021 16z"/></svg>',
-          iconBg: '#dcfce7', iconColor: '#16a34a'
-        },
-        {
           label: 'Reminder Servis',
           value: 5,
           valueColor: '#ef4444',
@@ -114,8 +102,8 @@ export default {
   methods: {
     refresh() {
       // Simulasi refresh
-      const oldVal = this.stats[3].value
-      this.stats[3].value = oldVal
+      const oldVal = this.stats[1].value
+      this.stats[1].value = oldVal
     }
   }
 }
@@ -129,7 +117,7 @@ export default {
 .page-sub { font-size: 0.8rem; color: #9ca3af; margin-top: 2px; }
 .btn-refresh { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #fff; border: 1px solid #e8ecf0; border-radius: 8px; font-size: 0.85rem; color: #374151; cursor: pointer; }
 .content-body { flex: 1; padding: 1.5rem 2rem; }
-.stats-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
+.stats-grid { display: grid; grid-template-columns: repeat(2, 1fr); gap: 1rem; margin-bottom: 1.5rem; }
 .stat-card { background: #fff; border-radius: 12px; padding: 1.25rem; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 1px 4px rgba(0,0,0,0.06); }
 .stat-label { font-size: 0.8rem; color: #9ca3af; margin-bottom: 4px; }
 .stat-value { font-size: 2rem; font-weight: 700; }
@@ -152,5 +140,5 @@ export default {
 .badge-red { background: #fee2e2; color: #991b1b; }
 .badge-yellow { background: #fef9c3; color: #854d0e; }
 .badge-orange { background: #ffedd5; color: #9a3412; }
-@media (max-width: 900px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 900px) { .stats-grid { grid-template-columns: 1fr; } }
 </style>
