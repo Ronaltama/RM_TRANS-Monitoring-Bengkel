@@ -2,10 +2,7 @@
   <aside class="sidebar">
     <!-- Logo -->
     <div class="sidebar-logo">
-      <svg viewBox="0 0 24 24" fill="currentColor" width="28" height="28">
-        <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-      </svg>
-      <span>RM Trans</span>
+      <img src="/logo.png" alt="RM Trans" class="sidebar-logo-img" />
     </div>
 
     <!-- Navigation -->
@@ -78,7 +75,8 @@ export default {
 
 <style scoped>
 .sidebar { position: sticky; top: 0; height: 100vh; overflow-y: auto; width: 220px; background: #fff; border-right: 1px solid #e8ecf0; display: flex; flex-direction: column; flex-shrink: 0; }
-.sidebar-logo { display: flex; align-items: center; gap: 0.6rem; padding: 1.25rem 1rem; color: #4f46e5; font-weight: 700; font-size: 1rem; border-bottom: 1px solid #e8ecf0; }
+.sidebar-logo { display: flex; align-items: center; justify-content: center; padding: 1.25rem 1rem; border-bottom: 1px solid #e8ecf0; }
+.sidebar-logo-img { max-width: 160px; height: auto; object-fit: contain; }
 .sidebar-nav { flex: 1; padding: 0.75rem; display: flex; flex-direction: column; gap: 2px; }
 .nav-item { display: flex; align-items: center; gap: 0.7rem; padding: 0.65rem 0.85rem; border-radius: 8px; color: #6b7280; text-decoration: none; font-size: 0.875rem; font-weight: 500; transition: all 0.15s; position: relative; }
 .nav-item:hover { background: #f3f4ff; color: #4f46e5; }

@@ -3,9 +3,7 @@
     <div class="login-card">
       <div class="login-header">
         <div class="logo-icon">
-          <svg viewBox="0 0 24 24" fill="currentColor" width="36" height="36">
-            <path d="M12 2C6.5 2 2 6.5 2 12s4.5 10 10 10 10-4.5 10-10S17.5 2 12 2zm-2 14.5v-9l6 4.5-6 4.5z"/>
-          </svg>
+          <img src="/logo.png" alt="RM Trans Logo" class="login-logo-img" />
         </div>
         <h1>RM Trans</h1>
         <p>Monitoring Bengkel</p>
@@ -76,7 +74,8 @@ export default {
   box-shadow: 0 25px 50px rgba(0,0,0,0.4);
 }
 .login-header { text-align: center; margin-bottom: 2rem; }
-.logo-icon { color: #e94560; margin-bottom: 0.75rem; }
+.logo-icon { margin-bottom: 0.75rem; }
+.login-logo-img { height: 60px; width: auto; object-fit: contain; }
 .login-header h1 { font-size: 1.8rem; font-weight: 700; color: #fff; margin-bottom: 0.25rem; }
 .login-header p { color: rgba(255,255,255,0.5); font-size: 0.9rem; }
 .form-group { margin-bottom: 1.25rem; }
