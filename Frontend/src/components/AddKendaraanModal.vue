@@ -1,61 +1,84 @@
 <template>
-  <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
-    <div class="modal-box">
-      <div class="modal-header">
-        <div>
-          <h3 class="modal-title">Tambah Kendaraan Baru</h3>
-          <p class="modal-sub">Masukkan data kendaraan.</p>
+  <transition name="modal-fade">
+    <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
+      <div class="modal-box">
+
+        <div class="modal-header">
+          <div class="modal-header-left">
+            <div class="modal-icon">
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M5 17h14v-5H5v5zM5 12l2-7h10l2 7"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/>
+              </svg>
+            </div>
+            <div>
+              <h3 class="modal-title">Tambah Kendaraan</h3>
+              <p class="modal-sub">Masukkan data kendaraan baru</p>
+            </div>
+          </div>
+          <button class="close-btn" @click="$emit('close')">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18" stroke-width="2">
+              <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+            </svg>
+          </button>
         </div>
-        <button class="close-btn" @click="$emit('close')">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="20" height="20" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-        </button>
+
+        <form @submit.prevent="handleSubmit" class="modal-body">
+          <div class="form-group">
+            <label>Merk Kendaraan <span class="req">*</span></label>
+            <select v-model="form.jenis_kendaraan" required>
+              <option value="">— Pilih Merk —</option>
+              <option v-for="m in merks" :key="m" :value="m">{{ m }}</option>
+            </select>
+          </div>
+
+          <div class="form-group">
+            <label>Nomor Polisi <span class="req">*</span></label>
+            <input v-model="form.nopol" type="text" placeholder="Contoh: B 1234 ABC" required />
+            <p class="hint">Format: Kode Area, 1–4 angka, 1–3 huruf</p>
+          </div>
+
+          <transition name="fade">
+            <div v-if="form.jenis_kendaraan || form.nopol" class="preview-box">
+              <div class="preview-row">
+                <span class="preview-label">Jenis</span>
+                <span class="preview-val">{{ form.jenis_kendaraan || '—' }}</span>
+              </div>
+              <div class="preview-row">
+                <span class="preview-label">Nopol</span>
+                <span class="preview-val nopol">{{ form.nopol || '—' }}</span>
+              </div>
+            </div>
+          </transition>
+
+          <div class="modal-footer">
+            <button type="button" class="btn-cancel" @click="$emit('close')">Batal</button>
+            <button type="submit" class="btn-submit" :disabled="!canSubmit">
+              <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
+              Simpan
+            </button>
+          </div>
+        </form>
+
       </div>
-
-      <form @submit.prevent="handleSubmit" class="modal-body">
-        <div class="form-group">
-          <label>Merk Kendaraan <span class="req">*</span></label>
-          <select v-model="form.jenis_kendaraan" required>
-            <option value="">-- Pilih Merk --</option>
-            <option value="Hino">Hino</option>
-            <option value="Mitsubishi">Mitsubishi</option>
-            <option value="Isuzu">Isuzu</option>
-            <option value="Toyota">Toyota</option>
-            <option value="Daihatsu">Daihatsu</option>
-            <option value="Suzuki">Suzuki</option>
-            <option value="Nissan">Nissan</option>
-          </select>
-        </div>
-        <div class="form-group">
-          <label>Nomor Polisi <span class="req">*</span></label>
-          <input v-model="form.nopol" type="text" placeholder="Contoh: B 1234 ABC" required />
-          <p class="hint">Format: Kode Area, 4 angka, 3 huruf</p>
-        </div>
-
-        <div v-if="form.jenis_kendaraan || form.nopol" class="preview-box">
-          <p><strong>Jenis:</strong> {{ form.jenis_kendaraan || '-' }}</p>
-          <p><strong>Nopol:</strong> {{ form.nopol || '-' }}</p>
-        </div>
-
-        <div class="modal-footer">
-          <button type="button" class="btn-cancel" @click="$emit('close')">Batal</button>
-          <button type="submit" class="btn-submit" :disabled="!canSubmit">Simpan</button>
-        </div>
-      </form>
     </div>
-  </div>
+  </transition>
 </template>
 
 <script>
 export default {
   name: 'AddKendaraanModal',
   props: { isOpen: { type: Boolean, default: false } },
-  computed: {
-    canSubmit() {
-      return this.form.jenis_kendaraan && this.form.nopol.trim() && /^[A-Z]{1,2}\s\d{1,4}\s[A-Z]{1,3}$/i.test(this.form.nopol.trim())
+  data() {
+    return {
+      form: { jenis_kendaraan: '', nopol: '' },
+      merks: ['Hino', 'Mitsubishi', 'Isuzu', 'Toyota', 'Daihatsu', 'Suzuki', 'Nissan']
     }
   },
-  data() {
-    return { form: { jenis_kendaraan: '', nopol: '' } }
+  computed: {
+    canSubmit() {
+      return this.form.jenis_kendaraan && this.form.nopol.trim() &&
+        /^[A-Z]{1,2}\s\d{1,4}\s[A-Z]{1,3}$/i.test(this.form.nopol.trim())
+    }
   },
   watch: {
     isOpen(v) { if (v) this.form = { jenis_kendaraan: '', nopol: '' } }
@@ -63,31 +86,130 @@ export default {
   methods: {
     handleSubmit() {
       if (!this.canSubmit) return
-      this.$emit('kendaraan-added', { jenis_kendaraan: this.form.jenis_kendaraan, nopol: this.form.nopol.trim().toUpperCase() })
+      this.$emit('kendaraan-added', {
+        jenis_kendaraan: this.form.jenis_kendaraan,
+        nopol: this.form.nopol.trim().toUpperCase()
+      })
     }
   }
 }
 </script>
 
 <style scoped>
-.modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 50; }
-.modal-box { background: #fff; border-radius: 14px; width: 100%; max-width: 440px; box-shadow: 0 20px 50px rgba(0,0,0,0.2); }
-.modal-header { display: flex; justify-content: space-between; align-items: flex-start; padding: 1.25rem 1.5rem; border-bottom: 1px solid #f1f5f9; }
-.modal-title { font-size: 1rem; font-weight: 600; color: #1f2937; }
-.modal-sub { font-size: 0.8rem; color: #9ca3af; margin-top: 2px; }
-.close-btn { background: none; border: none; color: #9ca3af; cursor: pointer; padding: 4px; }
-.close-btn:hover { color: #374151; }
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ===== OVERLAY ===== */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(15, 15, 40, 0.55);
+  display: flex; align-items: center; justify-content: center;
+  z-index: 50; padding: 1rem;
+  backdrop-filter: blur(2px);
+}
+
+/* ===== BOX ===== */
+.modal-box {
+  background: #fff;
+  border-radius: 18px;
+  width: 100%; max-width: 440px;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.18);
+  font-family: 'Poppins', sans-serif;
+  overflow: hidden;
+}
+
+/* ===== HEADER ===== */
+.modal-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 1.25rem 1.5rem;
+  border-bottom: 1px solid #f0f0f8;
+}
+.modal-header-left { display: flex; align-items: center; gap: 0.75rem; }
+.modal-icon {
+  width: 40px; height: 40px;
+  background: #ede9fe; color: #6d28d9;
+  border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  flex-shrink: 0;
+}
+.modal-title { font-size: 0.95rem; font-weight: 600; color: #1e1d4c; }
+.modal-sub { font-size: 0.75rem; color: #9ca3af; margin-top: 1px; }
+.close-btn {
+  background: #f5f5fb; border: none; border-radius: 8px;
+  color: #9ca3af; cursor: pointer; padding: 7px;
+  display: flex; align-items: center;
+  transition: all 0.15s;
+}
+.close-btn:hover { background: #f0f0f0; color: #374151; }
+
+/* ===== BODY ===== */
 .modal-body { padding: 1.25rem 1.5rem; }
-.form-group { margin-bottom: 1rem; }
-label { display: block; font-size: 0.85rem; font-weight: 500; color: #374151; margin-bottom: 5px; }
+
+/* ===== FORM ===== */
+.form-group { margin-bottom: 1.1rem; }
+label { display: block; font-size: 0.8rem; font-weight: 600; color: #3E3D90; margin-bottom: 6px; letter-spacing: 0.3px; text-transform: uppercase; }
 .req { color: #ef4444; }
-input, select { width: 100%; padding: 0.6rem 0.9rem; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; outline: none; box-sizing: border-box; }
-input:focus, select:focus { border-color: #4f46e5; }
-.hint { font-size: 0.75rem; color: #9ca3af; margin-top: 4px; }
-.preview-box { background: #f9fafb; border-radius: 8px; padding: 0.75rem 1rem; font-size: 0.85rem; color: #374151; margin-bottom: 1rem; }
-.preview-box p { margin-bottom: 4px; }
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding-top: 0.5rem; }
-.btn-cancel { padding: 0.6rem 1.25rem; background: #fff; border: 1px solid #d1d5db; border-radius: 8px; font-size: 0.875rem; cursor: pointer; }
-.btn-submit { padding: 0.6rem 1.25rem; background: #4f46e5; border: none; border-radius: 8px; color: #fff; font-size: 0.875rem; font-weight: 500; cursor: pointer; }
-.btn-submit:disabled { background: #c7d2fe; cursor: not-allowed; }
+
+input, select {
+  width: 100%; padding: 0.65rem 0.9rem;
+  border: 1.5px solid #e8e8f0;
+  border-radius: 10px;
+  font-family: 'Poppins', sans-serif;
+  font-size: 0.875rem; color: #374151;
+  outline: none; background: #fff;
+  box-sizing: border-box;
+  transition: border-color 0.2s, box-shadow 0.2s;
+}
+input:focus, select:focus {
+  border-color: #3E3D90;
+  box-shadow: 0 0 0 3px rgba(62,61,144,0.1);
+}
+input::placeholder { color: #c0c0d0; }
+
+.hint { font-size: 0.72rem; color: #b0b0c8; margin-top: 5px; }
+
+/* ===== PREVIEW ===== */
+.preview-box {
+  background: #f5f5fb;
+  border: 1px solid #e8e8f0;
+  border-radius: 10px;
+  padding: 0.85rem 1rem;
+  margin-bottom: 1.1rem;
+  display: flex; flex-direction: column; gap: 6px;
+}
+.preview-row { display: flex; align-items: center; gap: 0.5rem; font-size: 0.83rem; }
+.preview-label { color: #9ca3af; font-weight: 500; width: 50px; flex-shrink: 0; }
+.preview-val { color: #1e1d4c; font-weight: 600; }
+.preview-val.nopol { font-size: 0.9rem; letter-spacing: 0.5px; }
+
+/* ===== FOOTER ===== */
+.modal-footer {
+  display: flex; justify-content: flex-end; gap: 0.65rem;
+  padding-top: 0.5rem;
+}
+.btn-cancel {
+  padding: 0.6rem 1.2rem;
+  background: #fff; border: 1.5px solid #e8e8f0;
+  border-radius: 10px; font-family: 'Poppins', sans-serif;
+  font-size: 0.83rem; font-weight: 500; color: #6b7280;
+  cursor: pointer; transition: all 0.15s;
+}
+.btn-cancel:hover { background: #f5f5fb; border-color: #d0d0e8; }
+.btn-submit {
+  display: flex; align-items: center; gap: 6px;
+  padding: 0.6rem 1.2rem;
+  background: #3E3D90; border: none;
+  border-radius: 10px; font-family: 'Poppins', sans-serif;
+  font-size: 0.83rem; font-weight: 600; color: #fff;
+  cursor: pointer;
+  box-shadow: 0 4px 12px rgba(62,61,144,0.3);
+  transition: background 0.15s, transform 0.1s;
+}
+.btn-submit:hover:not(:disabled) { background: #4c4bb0; transform: translateY(-1px); }
+.btn-submit:disabled { background: #c7d2fe; cursor: not-allowed; box-shadow: none; transform: none; }
+
+/* ===== TRANSITIONS ===== */
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
+.modal-fade-enter, .modal-fade-leave-to { opacity: 0; }
+.fade-enter-active, .fade-leave-active { transition: opacity 0.2s; }
+.fade-enter, .fade-leave-to { opacity: 0; }
 </style>
