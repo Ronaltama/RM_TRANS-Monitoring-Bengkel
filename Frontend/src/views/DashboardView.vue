@@ -440,4 +440,26 @@ body { font-family: 'Poppins', sans-serif; }
   .topbar { padding: 1rem 1.25rem; }
   .topbar-date { display: none; }
 }
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 1rem 1rem 1rem 4rem; /* ruang untuk hamburger */
+  }
+  .page-title { font-size: 1rem; }
+  .content-body { padding: 1rem; gap: 1rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .table thead th:nth-child(2),
+  .table tbody td:nth-child(2) { display: none; }
+  .table thead th,
+  .table tbody td { padding: 0.75rem 1rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .topbar-right { gap: 0.4rem; }
+  .btn-refresh { padding: 0.4rem 0.7rem; font-size: 0.75rem; }
+  .table tbody td { padding: 0.7rem 0.75rem; font-size: 0.8rem; }
+  .badge { font-size: 0.65rem; padding: 0.22rem 0.6rem; }
+  .card-header { padding: 0.85rem 1rem; }
+}
 </style>

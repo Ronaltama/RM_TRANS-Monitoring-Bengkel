@@ -272,5 +272,34 @@ export default {
 .badge-gray   { background: #f3f4f6; color: #374151; }
 
 @media (max-width: 1024px) { .stats-grid { grid-template-columns: repeat(2, 1fr); } }
-@media (max-width: 600px) { .stats-grid { grid-template-columns: 1fr; } .content-body { padding: 1rem; } }
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 1rem 1rem 1rem 4rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .page-title { font-size: 1rem; }
+  .content-body { padding: 1rem; gap: 1rem; }
+  .stats-grid { grid-template-columns: repeat(2, 1fr); gap: 0.75rem; }
+  .filters-row { flex-wrap: wrap; }
+  .search-wrap { max-width: 100%; flex: 1 1 200px; }
+  .select-filter { flex: 1 1 auto; }
+  /* Hide less important table columns */
+  .table thead th:nth-child(1),
+  .table tbody td:nth-child(1),
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4) { display: none; }
+  .table thead th,
+  .table tbody td { padding: 0.75rem 1rem; }
+}
+
+@media (max-width: 480px) {
+  .stats-grid { grid-template-columns: 1fr; }
+  .topbar { padding: 0.85rem 0.85rem 0.85rem 3.5rem; }
+  .btn-primary { padding: 0.5rem 0.85rem; font-size: 0.78rem; }
+  .btn-primary svg { display: none; }
+  .card-header { padding: 0.85rem 1rem; }
+  .table tbody td { padding: 0.65rem 0.75rem; font-size: 0.8rem; }
+}
 </style>

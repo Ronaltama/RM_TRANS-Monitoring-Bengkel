@@ -1,44 +1,65 @@
 <template>
-  <aside class="sidebar">
-    <!-- Logo -->
-    <div class="sidebar-logo">
-      <img src="/logo.png" alt="RM Trans" class="sidebar-logo-img" />
-    </div>
+  <div class="sidebar-wrapper">
+    <!-- Mobile Toggle Button -->
+    <button class="hamburger-btn" @click="isOpen = !isOpen" :class="{ open: isOpen }" aria-label="Toggle Menu">
+      <span></span>
+      <span></span>
+      <span></span>
+    </button>
 
-    <!-- Navigation -->
-    <nav class="sidebar-nav">
-      <p class="nav-section-label">Menu Utama</p>
-      <router-link
-        v-for="item in menuItems"
-        :key="item.path"
-        :to="item.path"
-        class="nav-item"
-        :class="{ active: $route.path === item.path || $route.path.startsWith(item.path + '/') }"
-      >
-        <span class="nav-icon" v-html="item.icon"></span>
-        <span class="nav-label">{{ item.label }}</span>
-        <span v-if="item.badge" class="nav-badge"></span>
-      </router-link>
-    </nav>
+    <!-- Mobile Overlay -->
+    <div class="sidebar-overlay" v-if="isOpen" @click="isOpen = false"></div>
 
-    <!-- User + Logout -->
-    <div class="sidebar-footer">
-      <div class="user-info">
-        <div class="user-avatar">A</div>
-        <div class="user-details">
-          <span class="user-name">Admin RM Trans</span>
-          <span class="user-role">Administrator</span>
-        </div>
-      </div>
-      <button class="logout-btn" @click="$router.push('/login')">
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2">
-          <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-          <polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>
+    <!-- Sidebar -->
+    <aside class="sidebar" :class="{ 'sidebar-open': isOpen }">
+      <!-- Close button (mobile) -->
+      <button class="sidebar-close-btn" @click="isOpen = false" aria-label="Tutup menu">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18" stroke-width="2">
+          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
         </svg>
-        Keluar
       </button>
-    </div>
-  </aside>
+
+      <!-- Logo -->
+      <div class="sidebar-logo">
+        <img src="/logo.png" alt="RM Trans" class="sidebar-logo-img" />
+      </div>
+
+      <!-- Navigation -->
+      <nav class="sidebar-nav">
+        <p class="nav-section-label">Menu Utama</p>
+        <router-link
+          v-for="item in menuItems"
+          :key="item.path"
+          :to="item.path"
+          class="nav-item"
+          :class="{ active: $route.path === item.path || $route.path.startsWith(item.path + '/') }"
+          @click.native="isOpen = false"
+        >
+          <span class="nav-icon" v-html="item.icon"></span>
+          <span class="nav-label">{{ item.label }}</span>
+          <span v-if="item.badge" class="nav-badge"></span>
+        </router-link>
+      </nav>
+
+      <!-- User + Logout -->
+      <div class="sidebar-footer">
+        <div class="user-info">
+          <div class="user-avatar">A</div>
+          <div class="user-details">
+            <span class="user-name">Admin RM Trans</span>
+            <span class="user-role">Administrator</span>
+          </div>
+        </div>
+        <button class="logout-btn" @click="$router.push('/login')">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2">
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
+            <polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>
+          </svg>
+          Keluar
+        </button>
+      </div>
+    </aside>
+  </div>
 </template>
 
 <script>
@@ -46,6 +67,7 @@ export default {
   name: 'Sidebar',
   data() {
     return {
+      isOpen: false,
       menuItems: [
         {
           path: '/dashboard',
@@ -71,6 +93,72 @@ export default {
 
 <style scoped>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
+/* ===== WRAPPER ===== */
+.sidebar-wrapper {
+  position: relative;
+  flex-shrink: 0;
+}
+
+/* ===== HAMBURGER ===== */
+.hamburger-btn {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: 5px;
+  width: 40px;
+  height: 40px;
+  background: #fff;
+  border: 1.5px solid #e8e8f0;
+  border-radius: 10px;
+  cursor: pointer;
+  position: fixed;
+  top: 14px;
+  left: 14px;
+  z-index: 200;
+  transition: all 0.2s;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+}
+.hamburger-btn span {
+  display: block;
+  width: 18px;
+  height: 2px;
+  background: #374151;
+  border-radius: 2px;
+  transition: all 0.25s ease;
+  transform-origin: center;
+}
+.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
+.hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
+.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+/* ===== OVERLAY ===== */
+.sidebar-overlay {
+  display: none;
+  position: fixed;
+  inset: 0;
+  background: rgba(15,15,40,0.45);
+  z-index: 90;
+  backdrop-filter: blur(2px);
+}
+
+/* ===== CLOSE BUTTON (mobile only) ===== */
+.sidebar-close-btn {
+  display: none;
+  position: absolute;
+  top: 12px;
+  right: 12px;
+  background: #f5f5fb;
+  border: none;
+  border-radius: 8px;
+  color: #9ca3af;
+  cursor: pointer;
+  padding: 6px;
+  align-items: center;
+  transition: all 0.15s;
+}
+.sidebar-close-btn:hover { background: #f0f0f0; color: #374151; }
 
 .sidebar {
   position: sticky;
@@ -234,5 +322,35 @@ export default {
 
 .logout-btn:hover {
   background: #fff0f0;
+}
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .hamburger-btn {
+    display: flex;
+  }
+
+  .sidebar-overlay {
+    display: block;
+  }
+
+  .sidebar-close-btn {
+    display: flex;
+  }
+
+  .sidebar {
+    position: fixed;
+    left: -260px;
+    top: 0;
+    height: 100vh;
+    width: 260px;
+    z-index: 100;
+    transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+  }
+
+  .sidebar.sidebar-open {
+    left: 0;
+  }
 }
 </style>

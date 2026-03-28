@@ -396,4 +396,11 @@ export default {
     max-width: 160px;
   }
 }
+
+@media (max-width: 360px) {
+  .login-wrapper { padding: 1rem; }
+  .login-card { padding: 1.5rem 1.1rem 1.4rem; }
+  .card-subtitle { font-size: 12px; }
+  .btn-login { padding: 11px; font-size: 14px; }
+}
 </style>

@@ -387,7 +387,6 @@ export default {
 .search-wrap input::placeholder { color: #c0c0d0; }
 
 /* COMPONENTS */
-.component-list { }
 .component-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #f5f5fb; transition: background 0.1s; }
 .component-item:last-child { border-bottom: none; }
 .component-item:hover { background: #faf9ff; }
@@ -462,4 +461,50 @@ input::placeholder { color: #c0c0d0; }
 
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
 .modal-fade-enter, .modal-fade-leave-to { opacity: 0; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 900px) {
+  .topbar { flex-wrap: wrap; gap: 0.75rem; }
+  .km-card { min-width: auto; }
+}
+
+@media (max-width: 768px) {
+  .topbar {
+    padding: 0.85rem 1rem 0.85rem 4rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .page-title { font-size: 1.05rem; }
+  .content-body { padding: 1rem; }
+  .section-header {
+    flex-direction: column;
+    align-items: flex-start;
+    padding: 0.85rem 1rem;
+    gap: 0.65rem;
+  }
+  .section-actions {
+    width: 100%;
+    justify-content: space-between;
+  }
+  .filter-tabs { flex-wrap: wrap; }
+  .search-row { padding: 0.75rem 1rem; }
+  .search-wrap { max-width: 100%; }
+  .component-item { padding: 0.85rem 1rem; gap: 0.75rem; }
+  .comp-name { font-size: 0.82rem; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0.75rem 0.75rem 0.75rem 3.5rem; }
+  .topbar-left { gap: 0.6rem; }
+  .page-title { font-size: 0.95rem; }
+  .vehicle-title-row { flex-wrap: wrap; gap: 0.4rem; }
+  .km-card { padding: 0.55rem 0.85rem; }
+  .km-value { font-size: 1.15rem; }
+  .btn-primary { padding: 0.45rem 0.75rem; font-size: 0.75rem; }
+  .btn-primary svg { display: none; }
+  .comp-icon { width: 32px; height: 32px; }
+  .comp-actions .icon-btn { width: 26px; height: 26px; }
+  .filter-tab { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
+  .modal-box { border-radius: 14px; margin: 0.5rem; }
+}
 </style>

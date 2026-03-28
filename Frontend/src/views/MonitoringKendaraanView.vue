@@ -219,4 +219,36 @@ export default {
 
 .icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 8px; cursor: pointer; color: #b0b0c8; transition: all 0.15s; }
 .icon-btn.delete:hover { color: #ef4444; background: #fff0f0; }
+
+/* ===== RESPONSIVE ===== */
+@media (max-width: 768px) {
+  .topbar {
+    padding: 1rem 1rem 1rem 4rem;
+    flex-wrap: wrap;
+    gap: 0.75rem;
+  }
+  .topbar-actions { flex-wrap: wrap; }
+  .page-title { font-size: 1rem; }
+  .content-body { padding: 1rem; }
+  .card-header { flex-direction: column; align-items: flex-start; }
+  .search-wrap input { width: 100%; }
+  /* Hide some table columns on tablet */
+  .table thead th:nth-child(3),
+  .table tbody td:nth-child(3) { display: none; }
+  .table thead th,
+  .table tbody td { padding: 0.75rem 1rem; }
+  .btn-secondary { display: none; }
+}
+
+@media (max-width: 480px) {
+  .topbar { padding: 0.85rem 0.85rem 0.85rem 3.5rem; }
+  .page-title { font-size: 0.95rem; }
+  /* On small phone, also hide status column */
+  .table thead th:nth-child(4),
+  .table tbody td:nth-child(4) { display: none; }
+  .table tbody td { padding: 0.65rem 0.75rem; font-size: 0.8rem; }
+  .btn-primary { padding: 0.5rem 0.85rem; font-size: 0.78rem; }
+  .btn-primary svg { display: none; }
+  .card-header { padding: 0.85rem 1rem; }
+}
 </style>
