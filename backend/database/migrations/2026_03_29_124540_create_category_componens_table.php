@@ -11,13 +11,10 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('category_componen', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('username')->unique();
-            $table->string('name')->nullable();
-            $table->string('password');
-            $table->enum('role', ['admin', 'superadmin']);
-            $table->timestamps();
+            $table->string('nama_kategori', 100);
+            $table->string('icon', 50)->nullable();
         });
     }
 
@@ -26,6 +23,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('category_componens');
     }
 };
