@@ -11,13 +11,16 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('users', function (Blueprint $table) {
+        Schema::create('log_kilometer', function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->string('username')->unique();
-            $table->string('name')->nullable();
-            $table->string('password');
-            $table->enum('role', ['admin', 'superadmin']);
-            $table->timestamps();
+            $table->uuid('armada_id');
+            $table->integer('odometer_km');
+            $table->integer('delta_km');
+            $table->date('tgl_input');
+
+            $table->foreign('armada_id')
+                ->references('id')->on('armada')
+                ->cascadeOnDelete();
         });
     }
 
@@ -26,6 +29,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('users');
+        Schema::dropIfExists('log_kilometers');
     }
 };
