@@ -125,9 +125,9 @@ export default {
       ],
       reminders: [
         { id: 1, vehicle: 'B 1234 ABC — Hino', component: 'Oli Mesin', status: 'Kritis < 500 KM', badgeClass: 'badge-red', dotClass: 'dot-red' },
-        { id: 2, vehicle: 'D 5678 XYZ — Mitsubishi', component: 'Ban Depan', status: 'Segera < 2000 KM', badgeClass: 'badge-yellow', dotClass: 'dot-yellow' },
-        { id: 3, vehicle: 'F 9012 GHI — Isuzu', component: 'Aki', status: 'Perhatian < 4000 KM', badgeClass: 'badge-orange', dotClass: 'dot-orange' },
-        { id: 4, vehicle: 'AB 3456 JKL — Toyota', component: 'Filter Udara', status: 'Kritis < 7 Hari', badgeClass: 'badge-red', dotClass: 'dot-red' },
+        { id: 2, vehicle: 'D 5678 XYZ — Fuso', component: 'Ban Depan', status: 'Segera < 2000 KM', badgeClass: 'badge-yellow', dotClass: 'dot-yellow' },
+        { id: 3, vehicle: 'F 9012 GHI — Fusozu (Mitsubishi)', component: 'Aki', status: 'Perhatian < 4000 KM', badgeClass: 'badge-orange', dotClass: 'dot-orange' },
+        { id: 4, vehicle: 'AB 3456 JKL — Hino', component: 'Filter Udara', status: 'Kritis < 7 Hari', badgeClass: 'badge-red', dotClass: 'dot-red' },
         { id: 5, vehicle: 'B 7890 MNO — Hino', component: 'Kopling', status: 'Segera < 12 Hari', badgeClass: 'badge-yellow', dotClass: 'dot-yellow' }
       ]
     }
@@ -169,7 +169,9 @@ body { font-family: 'Poppins', sans-serif; }
 .topbar {
   background: #fff;
   border-bottom: 1px solid #e8e8f0;
-  padding: 1.1rem 2rem;
+  min-height: 80px;
+  box-sizing: border-box;
+  padding: 0 2rem;
   display: flex;
   align-items: center;
   justify-content: space-between;

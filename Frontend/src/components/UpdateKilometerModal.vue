@@ -29,23 +29,17 @@
           </div>
 
           <div class="form-group">
-            <label>Kilometer Awal <span class="note note-red">tidak update progress komponen</span></label>
-            <input v-model.number="form.baseKm" type="number" min="0" placeholder="Contoh: 50000" @input="validate" />
-            <p class="hint">Set ulang kilometer dasar kendaraan</p>
-          </div>
-
-          <div class="form-group">
-            <label>Tambah Kilometer <span class="note note-green">✓ update progress komponen</span></label>
-            <input v-model.number="form.additionalKm" type="number" min="0" placeholder="Contoh: 500" @input="validate" class="input-green" />
-            <p class="hint">Jarak yang baru ditempuh</p>
+            <label>KM Saat Ini <span class="note note-green">✓ update progress komponen</span></label>
+            <input v-model.number="form.newKm" type="number" min="0" placeholder="Contoh: 50500" @input="validate" class="input-green" />
+            <p class="hint">Masukkan angka terbaru dari speedometer truk</p>
           </div>
 
           <div class="preview-box">
-            <p class="preview-label">Total Kilometer Baru</p>
-            <p class="preview-value">{{ formatNumber(newTotal) }} <span class="preview-unit">km</span></p>
+            <p class="preview-label">Penambahan Jarak (Selisih)</p>
             <div class="preview-details">
-              <span>Base: {{ formatNumber(form.baseKm || 0) }} km</span>
-              <span v-if="form.additionalKm > 0" class="detail-green">+ {{ formatNumber(form.additionalKm) }} km</span>
+              <span v-if="(form.newKm || 0) > currentKm" class="detail-green">+ {{ formatNumber((form.newKm || 0) - currentKm) }} kmjalanan baru</span>
+              <span v-else-if="(form.newKm || 0) > 0" class="detail-red" style="color: #dc2626; font-weight: 500;">Angka harus lebih besar dari KM sebelumnya ({{ formatNumber(currentKm) }} km)</span>
+              <span v-else>0 km</span>
             </div>
           </div>
 
@@ -80,27 +74,28 @@ export default {
   data() {
     return {
       loading: false,
-      form: { baseKm: 0, additionalKm: 0 },
+      form: { newKm: null },
       errorMsg: ''
     }
   },
-  computed: {
-    newTotal() { return (this.form.baseKm || 0) + (this.form.additionalKm || 0) }
-  },
   watch: {
     isOpen(v) {
-      if (v) { this.form.baseKm = this.currentKm; this.form.additionalKm = 0; this.errorMsg = '' }
+      if (v) { this.form.newKm = null; this.errorMsg = '' }
     }
   },
   methods: {
     validate() {
-      if (this.form.baseKm < 0) this.form.baseKm = 0
-      if (this.form.additionalKm < 0) this.form.additionalKm = 0
+      if (this.form.newKm < 0) this.form.newKm = 0
       this.errorMsg = ''
     },
     update() {
+      if (!this.form.newKm || this.form.newKm <= this.currentKm) {
+        this.errorMsg = 'Kilometer baru harus lebih besar dari kilometer saat ini.'
+        return
+      }
       this.loading = true
-      const payload = { base_km: this.form.baseKm, additional_km: this.form.additionalKm, new_km: this.newTotal }
+      const additional = this.form.newKm - this.currentKm
+      const payload = { base_km: this.currentKm, additional_km: additional, new_km: this.form.newKm }
       monitoringService.updateKilometer(this.monitoringId, payload)
         .then(res => { if (res.data.success) { this.$emit('updated', res.data.data); this.$emit('close') } })
         .catch(err => { this.errorMsg = err.response?.data?.message || 'Gagal mengupdate kilometer' })

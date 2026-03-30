@@ -29,7 +29,7 @@
             <input v-model="form.nopol" type="text" placeholder="B 1234 ABC" required />
           </div>
           <div class="form-group">
-            <label>Merk Kendaraan <span class="req">*</span></label>
+            <label>Merk Truk <span class="req">*</span></label>
             <select v-model="form.jenis_kendaraan" required>
               <option value="" disabled>— Pilih Merk —</option>
               <option v-for="m in merks" :key="m" :value="m">{{ m }}</option>
@@ -59,8 +59,8 @@ export default {
   },
   data() {
     return {
-      form: { nopol: '', jenis_kendaraan: '' },
-      merks: ['Hino', 'Mitsubishi', 'Isuzu', 'Toyota', 'Daihatsu', 'Suzuki', 'Nissan']
+      form: { jenis_kendaraan: '', nopol: '' },
+      merks: ['Hino', 'Fuso', 'Fusozu (Mitsubishi)']
     }
   },
   watch: {

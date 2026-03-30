@@ -51,8 +51,8 @@
             </button>
           </div>
           <select v-model="selectedMerk" class="select-filter">
-            <option value="">Semua Jenis</option>
-            <option v-for="m in ['Hino','Mitsubishi','Isuzu','Toyota','Daihatsu']" :key="m" :value="m">{{ m }}</option>
+            <option value="">Semua Merk</option>
+            <option v-for="m in ['Hino', 'Fuso', 'Fusozu (Mitsubishi)']" :key="m" :value="m">{{ m }}</option>
           </select>
         </div>
 
@@ -70,7 +70,7 @@
                 <tr>
                   <th>#</th>
                   <th>Nomor Polisi</th>
-                  <th>Jenis Kendaraan</th>
+                  <th>Merk Truk</th>
                   <th>Tanggal Ditambah</th>
                   <th>Aksi</th>
                 </tr>
@@ -134,22 +134,22 @@ export default {
       nextId: 13,
       merkList: [
         { name: 'Hino', bg: '#dbeafe', color: '#1d4ed8' },
-        { name: 'Mitsubishi', bg: '#fee2e2', color: '#991b1b' },
-        { name: 'Isuzu', bg: '#fef9c3', color: '#854d0e' },
+        { name: 'Fuso', bg: '#fee2e2', color: '#991b1b' },
+        { name: 'Fusozu (Mitsubishi)', bg: '#fef9c3', color: '#854d0e' },
       ],
       kendaraanList: [
         { id: 1, nopol: 'B 1234 ABC', jenis_kendaraan: 'Hino', tanggal: '01/01/2024' },
-        { id: 2, nopol: 'D 5678 XYZ', jenis_kendaraan: 'Mitsubishi', tanggal: '05/01/2024' },
-        { id: 3, nopol: 'F 9012 GHI', jenis_kendaraan: 'Isuzu', tanggal: '10/01/2024' },
-        { id: 4, nopol: 'AB 3456 JKL', jenis_kendaraan: 'Toyota', tanggal: '15/01/2024' },
+        { id: 2, nopol: 'D 5678 XYZ', jenis_kendaraan: 'Fuso', tanggal: '05/01/2024' },
+        { id: 3, nopol: 'F 9012 GHI', jenis_kendaraan: 'Fusozu (Mitsubishi)', tanggal: '10/01/2024' },
+        { id: 4, nopol: 'AB 3456 JKL', jenis_kendaraan: 'Hino', tanggal: '15/01/2024' },
         { id: 5, nopol: 'B 7890 MNO', jenis_kendaraan: 'Hino', tanggal: '20/01/2024' },
-        { id: 6, nopol: 'L 1111 PQR', jenis_kendaraan: 'Mitsubishi', tanggal: '25/01/2024' },
+        { id: 6, nopol: 'L 1111 PQR', jenis_kendaraan: 'Fuso', tanggal: '25/01/2024' },
         { id: 7, nopol: 'N 2222 STU', jenis_kendaraan: 'Hino', tanggal: '01/02/2024' },
-        { id: 8, nopol: 'R 3333 VWX', jenis_kendaraan: 'Isuzu', tanggal: '05/02/2024' },
-        { id: 9, nopol: 'S 4444 YZA', jenis_kendaraan: 'Toyota', tanggal: '10/02/2024' },
-        { id: 10, nopol: 'K 5555 BCD', jenis_kendaraan: 'Daihatsu', tanggal: '15/02/2024' },
+        { id: 8, nopol: 'R 3333 VWX', jenis_kendaraan: 'Fusozu (Mitsubishi)', tanggal: '05/02/2024' },
+        { id: 9, nopol: 'S 4444 YZA', jenis_kendaraan: 'Fuso', tanggal: '10/02/2024' },
+        { id: 10, nopol: 'K 5555 BCD', jenis_kendaraan: 'Hino', tanggal: '15/02/2024' },
         { id: 11, nopol: 'H 6666 EFG', jenis_kendaraan: 'Hino', tanggal: '20/02/2024' },
-        { id: 12, nopol: 'G 7777 HIJ', jenis_kendaraan: 'Mitsubishi', tanggal: '25/02/2024' }
+        { id: 12, nopol: 'G 7777 HIJ', jenis_kendaraan: 'Fuso', tanggal: '25/02/2024' }
       ]
     }
   },
@@ -184,7 +184,7 @@ export default {
       this.kendaraanList = this.kendaraanList.filter(k => k.id !== id)
     },
     getMerkBadgeClass(j) {
-      const m = { 'Hino': 'badge-blue', 'Mitsubishi': 'badge-red', 'Isuzu': 'badge-yellow', 'Toyota': 'badge-green', 'Daihatsu': 'badge-purple' }
+      const m = { 'Hino': 'badge-blue', 'Fuso': 'badge-red', 'Fusozu (Mitsubishi)': 'badge-yellow' }
       return m[j] || 'badge-gray'
     }
   }
@@ -201,7 +201,7 @@ export default {
 .main-content { flex: 1; background: #f0f0f8; display: flex; flex-direction: column; min-width: 0; }
 
 /* ===== TOPBAR ===== */
-.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; min-height: 80px; box-sizing: border-box; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
 .page-title { font-size: 1.2rem; font-weight: 700; color: #1e1d4c; }
 .page-sub { font-size: 0.78rem; color: #9ca3af; margin-top: 2px; }
 .btn-primary { display: flex; align-items: center; gap: 7px; padding: 0.6rem 1.2rem; background: #3E3D90; border: none; border-radius: 10px; color: #fff; font-family: 'Poppins', sans-serif; font-size: 0.83rem; font-weight: 600; cursor: pointer; transition: background 0.15s, transform 0.1s; box-shadow: 0 4px 12px rgba(62,61,144,0.3); }
