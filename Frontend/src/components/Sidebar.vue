@@ -179,7 +179,9 @@ export default {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 1.5rem 1.25rem 1.25rem;
+  min-height: 80px;
+  box-sizing: border-box;
+  padding: 0 1.25rem;
   border-bottom: 1px solid #e8e8f0;
 }
 .sidebar-logo-img {

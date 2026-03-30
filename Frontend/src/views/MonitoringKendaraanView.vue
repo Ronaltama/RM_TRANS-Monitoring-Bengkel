@@ -51,7 +51,7 @@
               <thead>
                 <tr>
                   <th>Plat Nomor</th>
-                  <th>Jenis Kendaraan</th>
+                  <th>Merk Truk</th>
                   <th>Total KM</th>
                   <th>Status</th>
                   <th>Aksi</th>
@@ -126,11 +126,11 @@ export default {
       showAdd: false,
       monitoringList: [
         { id: 1, plat_nomor: 'B 1234 ABC', jenis_kendaraan: 'Hino', total_km: 87500, critical: 2 },
-        { id: 2, plat_nomor: 'D 5678 XYZ', jenis_kendaraan: 'Mitsubishi', total_km: 55200, critical: 1 },
-        { id: 3, plat_nomor: 'F 9012 GHI', jenis_kendaraan: 'Isuzu', total_km: 120000, critical: 0 },
-        { id: 4, plat_nomor: 'AB 3456 JKL', jenis_kendaraan: 'Toyota', total_km: 34800, critical: 3 },
+        { id: 2, plat_nomor: 'D 5678 XYZ', jenis_kendaraan: 'Fuso', total_km: 55200, critical: 1 },
+        { id: 3, plat_nomor: 'F 9012 GHI', jenis_kendaraan: 'Fusozu (Mitsubishi)', total_km: 120000, critical: 0 },
+        { id: 4, plat_nomor: 'AB 3456 JKL', jenis_kendaraan: 'Hino', total_km: 34800, critical: 3 },
         { id: 5, plat_nomor: 'B 7890 MNO', jenis_kendaraan: 'Hino', total_km: 98700, critical: 0 },
-        { id: 6, plat_nomor: 'L 1111 PQR', jenis_kendaraan: 'Mitsubishi', total_km: 67300, critical: 1 }
+        { id: 6, plat_nomor: 'L 1111 PQR', jenis_kendaraan: 'Fuso', total_km: 67300, critical: 1 }
       ]
     }
   },
@@ -162,7 +162,7 @@ export default {
 .page-layout { display: flex; min-height: 100vh; font-family: 'Poppins', sans-serif; }
 .main-content { flex: 1; background: #f0f0f8; display: flex; flex-direction: column; min-width: 0; }
 
-.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
+.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; min-height: 80px; box-sizing: border-box; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; position: sticky; top: 0; z-index: 10; }
 .page-title { font-size: 1.2rem; font-weight: 700; color: #1e1d4c; }
 .page-sub { font-size: 0.78rem; color: #9ca3af; margin-top: 2px; }
 .accent { color: #3E3D90; font-weight: 600; }

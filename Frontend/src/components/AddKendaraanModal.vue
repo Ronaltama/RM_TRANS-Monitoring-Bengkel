@@ -24,7 +24,7 @@
 
         <form @submit.prevent="handleSubmit" class="modal-body">
           <div class="form-group">
-            <label>Merk Kendaraan <span class="req">*</span></label>
+            <label>Merk Truk <span class="req">*</span></label>
             <select v-model="form.jenis_kendaraan" required>
               <option value="">— Pilih Merk —</option>
               <option v-for="m in merks" :key="m" :value="m">{{ m }}</option>
@@ -40,7 +40,7 @@
           <transition name="fade">
             <div v-if="form.jenis_kendaraan || form.nopol" class="preview-box">
               <div class="preview-row">
-                <span class="preview-label">Jenis</span>
+                <span class="preview-label">Merk</span>
                 <span class="preview-val">{{ form.jenis_kendaraan || '—' }}</span>
               </div>
               <div class="preview-row">
@@ -71,7 +71,7 @@ export default {
   data() {
     return {
       form: { jenis_kendaraan: '', nopol: '' },
-      merks: ['Hino', 'Mitsubishi', 'Isuzu', 'Toyota', 'Daihatsu', 'Suzuki', 'Nissan']
+      merks: ['Hino', 'Fuso', 'Fusozu (Mitsubishi)']
     }
   },
   computed: {

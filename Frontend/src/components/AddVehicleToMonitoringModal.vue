@@ -43,10 +43,10 @@ export default {
       availableKendaraan: [
         { id: 7, nopol: 'N 2222 STU', jenis_kendaraan: 'Hino' },
         { id: 8, nopol: 'R 3333 VWX', jenis_kendaraan: 'Isuzu' },
-        { id: 9, nopol: 'S 4444 YZA', jenis_kendaraan: 'Toyota' },
-        { id: 10, nopol: 'K 5555 BCD', jenis_kendaraan: 'Daihatsu' },
+        { id: 9, nopol: 'S 4444 YZA', jenis_kendaraan: 'Fuso' },
+        { id: 10, nopol: 'K 5555 BCD', jenis_kendaraan: 'Hino' },
         { id: 11, nopol: 'H 6666 EFG', jenis_kendaraan: 'Hino' },
-        { id: 12, nopol: 'G 7777 HIJ', jenis_kendaraan: 'Mitsubishi' }
+        { id: 12, nopol: 'G 7777 HIJ', jenis_kendaraan: 'Fuso' }
       ],
       form: { kendaraan_id: '', initial_km: 0 },
       errors: {}

@@ -135,13 +135,19 @@
               <p class="info-value">{{ formatNumber(vehicle.total_km) }} <span class="info-unit">km</span></p>
             </div>
             <div class="form-group">
-              <label>Tambah KM</label>
-              <input v-model.number="kmToAdd" type="number" min="0" placeholder="Contoh: 500" />
-              <p class="hint">Jarak yang baru ditempuh</p>
+              <label>KM Saat Ini (di Speedometer)</label>
+              <input v-model.number="newTotalKm" type="number" min="0" placeholder="Contoh: 85000" />
+              <p class="hint">Masukkan angka KM tanpa pemisah (contoh: 85000)</p>
             </div>
             <div class="preview-box">
-              <p class="preview-label">Total Baru</p>
-              <p class="preview-value">{{ formatNumber(vehicle.total_km + (kmToAdd || 0)) }} <span class="preview-unit">km</span></p>
+              <p class="preview-label">Selisih Jarak Ditempuh</p>
+              <p class="preview-value" v-if="(newTotalKm || 0) > vehicle.total_km" style="color: #16a34a;">
+                + {{ formatNumber((newTotalKm || 0) - vehicle.total_km) }} <span class="preview-unit">km</span>
+              </p>
+              <p class="preview-value" v-else-if="(newTotalKm || 0) > 0" style="color: #dc2626; font-size: 0.9rem;">
+                Harus > {{ formatNumber(vehicle.total_km) }} km
+              </p>
+              <p class="preview-value" v-else>0 <span class="preview-unit">km</span></p>
             </div>
           </div>
           <div class="modal-footer">
@@ -265,7 +271,7 @@ export default {
       showAddComponent: false,
       showEditComponent: false,
       selectedComponent: null,
-      kmToAdd: 0,
+      newTotalKm: null,
       newComp: { name: '', category: '', targetKm: 10000 },
       categories: ['Ban', 'Oli', 'Accu', 'Rem', 'Kopling', 'Filter', 'Lainnya'],
       vehicles: {
@@ -311,11 +317,11 @@ export default {
     getBarClass(h) { if (h < 30) return 'bg-red'; if (h < 60) return 'bg-orange'; return 'bg-green' },
     getHealthClass(h) { if (h < 30) return 'text-red'; if (h < 60) return 'text-orange'; return 'text-green' },
     updateKm() {
-      if (this.kmToAdd > 0) {
+      if (this.newTotalKm > this.vehicle.total_km) {
         const id = this.$route.params.id
-        if (this.vehicles[id]) this.vehicles[id].total_km += this.kmToAdd
+        if (this.vehicles[id]) this.vehicles[id].total_km = this.newTotalKm
       }
-      this.showUpdateKm = false; this.kmToAdd = 0
+      this.showUpdateKm = false; this.newTotalKm = null
     },
     markComplete(comp) {
       if (!confirm('Reset "' + comp.name + '" ke 100%?')) return
@@ -343,7 +349,7 @@ export default {
 .main-content { flex: 1; background: #f0f0f8; display: flex; flex-direction: column; min-width: 0; }
 
 /* TOPBAR */
-.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; padding: 1.1rem 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 10; }
+.topbar { background: #fff; border-bottom: 1px solid #e8e8f0; min-height: 80px; box-sizing: border-box; padding: 0 2rem; display: flex; align-items: center; justify-content: space-between; gap: 1rem; position: sticky; top: 0; z-index: 10; }
 .topbar-left { display: flex; align-items: center; gap: 0.85rem; }
 .back-btn { width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; border: 1.5px solid #e8e8f0; background: #f5f5fb; border-radius: 9px; cursor: pointer; color: #374151; transition: all 0.15s; flex-shrink: 0; }
 .back-btn:hover { background: #ede9fe; border-color: #3E3D90; color: #3E3D90; }
