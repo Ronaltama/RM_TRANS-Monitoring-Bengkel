@@ -1,5 +1,6 @@
 import Vue from 'vue'
 import VueRouter from 'vue-router'
+import store from '@/store'
 
 Vue.use(VueRouter)
 
@@ -16,22 +17,26 @@ const routes = [
   {
     path: '/dashboard',
     name: 'Dashboard',
-    component: () => import('@/views/DashboardView.vue')
+    component: () => import('@/views/DashboardView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/kendaraan',
     name: 'Kendaraan',
-    component: () => import('@/views/KendaraanView.vue')
+    component: () => import('@/views/KendaraanView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/monitoring-kendaraan',
     name: 'MonitoringKendaraan',
-    component: () => import('@/views/MonitoringKendaraanView.vue')
+    component: () => import('@/views/MonitoringKendaraanView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '/monitoring-kendaraan/:id',
     name: 'VehicleDetail',
-    component: () => import('@/views/VehicleDetailView.vue')
+    component: () => import('@/views/VehicleDetailView.vue'),
+    meta: { requiresAuth: true }
   },
   {
     path: '*',
@@ -44,5 +49,19 @@ const router = new VueRouter({
   base: '/',
   routes
 })
+
+// ROUTER GUARD
+router.beforeEach((to, from, next) => {
+  const token = store.state.auth.token
+
+  if (to.path === '/login' && token) {
+    next('/dashboard')
+  } else if (to.meta.requiresAuth && !token) {
+    next('/login')
+  } else {
+    next()
+  }
+})
+
 
 export default router

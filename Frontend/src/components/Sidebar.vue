@@ -15,7 +15,8 @@
       <!-- Close button (mobile) -->
       <button class="sidebar-close-btn" @click="isOpen = false" aria-label="Tutup menu">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="18" height="18" stroke-width="2">
-          <line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/>
+          <line x1="18" y1="6" x2="6" y2="18" />
+          <line x1="6" y1="6" x2="18" y2="18" />
         </svg>
       </button>
 
@@ -27,14 +28,9 @@
       <!-- Navigation -->
       <nav class="sidebar-nav">
         <p class="nav-section-label">Menu Utama</p>
-        <router-link
-          v-for="item in menuItems"
-          :key="item.path"
-          :to="item.path"
-          class="nav-item"
+        <router-link v-for="item in menuItems" :key="item.path" :to="item.path" class="nav-item"
           :class="{ active: $route.path === item.path || $route.path.startsWith(item.path + '/') }"
-          @click.native="isOpen = false"
-        >
+          @click.native="isOpen = false">
           <span class="nav-icon" v-html="item.icon"></span>
           <span class="nav-label">{{ item.label }}</span>
           <span v-if="item.badge" class="nav-badge"></span>
@@ -43,17 +39,18 @@
 
       <!-- User + Logout -->
       <div class="sidebar-footer">
-        <div class="user-info">
-          <div class="user-avatar">A</div>
+        <div class="user-info" v-if="user">
+          <div class="user-avatar">{{ userInitial }}</div>
           <div class="user-details">
-            <span class="user-name">Admin RM Trans</span>
-            <span class="user-role">Administrator</span>
+            <span class="user-name">{{ user.name }}</span>
+            <span class="user-role">{{ user.role }}</span>
           </div>
         </div>
-        <button class="logout-btn" @click="$router.push('/login')">
+        <button class="logout-btn" @click="handleLogout">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2">
-            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/>
-            <polyline points="16,17 21,12 16,7"/><line x1="21" y1="12" x2="9" y2="12"/>
+            <path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4" />
+            <polyline points="16,17 21,12 16,7" />
+            <line x1="21" y1="12" x2="9" y2="12" />
           </svg>
           Keluar
         </button>
@@ -63,6 +60,8 @@
 </template>
 
 <script>
+import Swal from 'sweetalert2'
+
 export default {
   name: 'Sidebar',
   data() {
@@ -87,7 +86,46 @@ export default {
         }
       ]
     }
+  },
+  computed: {
+    user() {
+      return this.$store.state.auth.user
+    },
+    userInitial() {
+      if (!this.user || !this.user.name) return '?'
+      return this.user.name.charAt(0).toUpperCase()
+    }
+  },
+  methods: {
+    async handleLogout() {
+      const result = await Swal.fire({
+        title: 'Apakah Anda yakin?',
+        text: "Anda akan keluar dari aplikasi!",
+        icon: 'warning',
+        showCancelButton: true,
+        confirmButtonColor: '#3E3D90',
+        cancelButtonColor: '#d33',
+        confirmButtonText: 'Ya, Keluar!',
+        cancelButtonText: 'Batal'
+      })
+
+      if (result.isConfirmed) {
+        await this.$store.dispatch('auth/logout')
+        this.isOpen = false
+        
+        Swal.fire({
+          title: 'Berhasil!',
+          text: 'Anda telah keluar.',
+          icon: 'success',
+          timer: 1500,
+          showConfirmButton: false
+        })
+
+        this.$router.push('/login')
+      }
+    }
   }
+
 }
 </script>
 
@@ -118,8 +156,9 @@ export default {
   left: 14px;
   z-index: 200;
   transition: all 0.2s;
-  box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
 }
+
 .hamburger-btn span {
   display: block;
   width: 18px;
@@ -129,16 +168,26 @@ export default {
   transition: all 0.25s ease;
   transform-origin: center;
 }
-.hamburger-btn.open span:nth-child(1) { transform: translateY(7px) rotate(45deg); }
-.hamburger-btn.open span:nth-child(2) { opacity: 0; transform: scaleX(0); }
-.hamburger-btn.open span:nth-child(3) { transform: translateY(-7px) rotate(-45deg); }
+
+.hamburger-btn.open span:nth-child(1) {
+  transform: translateY(7px) rotate(45deg);
+}
+
+.hamburger-btn.open span:nth-child(2) {
+  opacity: 0;
+  transform: scaleX(0);
+}
+
+.hamburger-btn.open span:nth-child(3) {
+  transform: translateY(-7px) rotate(-45deg);
+}
 
 /* ===== OVERLAY ===== */
 .sidebar-overlay {
   display: none;
   position: fixed;
   inset: 0;
-  background: rgba(15,15,40,0.45);
+  background: rgba(15, 15, 40, 0.45);
   z-index: 90;
   backdrop-filter: blur(2px);
 }
@@ -158,7 +207,11 @@ export default {
   align-items: center;
   transition: all 0.15s;
 }
-.sidebar-close-btn:hover { background: #f0f0f0; color: #374151; }
+
+.sidebar-close-btn:hover {
+  background: #f0f0f0;
+  color: #374151;
+}
 
 .sidebar {
   position: sticky;
@@ -184,6 +237,7 @@ export default {
   padding: 0 1.25rem;
   border-bottom: 1px solid #e8e8f0;
 }
+
 .sidebar-logo-img {
   max-width: 150px;
   height: auto;
@@ -245,7 +299,9 @@ export default {
   flex-shrink: 0;
 }
 
-.nav-label { flex: 1; }
+.nav-label {
+  flex: 1;
+}
 
 .nav-badge {
   width: 7px;
@@ -348,7 +404,7 @@ export default {
     width: 260px;
     z-index: 100;
     transition: left 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-    box-shadow: 4px 0 24px rgba(0,0,0,0.12);
+    box-shadow: 4px 0 24px rgba(0, 0, 0, 0.12);
   }
 
   .sidebar.sidebar-open {
