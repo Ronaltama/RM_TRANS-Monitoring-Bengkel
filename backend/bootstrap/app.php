@@ -12,7 +12,19 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        //
+        // Exclude API routes from CSRF validation (using Sanctum token-based auth)
+        $middleware->validateCsrfTokens(except: [
+            'api/*',
+            'sanctum/csrf-cookie',
+        ]);
+
+        // Add custom CORS middleware
+        $middleware->api(prepend: [
+            \App\Http\Middleware\HandleCorsRequest::class,
+        ]);
+
+        // Add stateful API support
+        $middleware->statefulApi();
     })
     ->withExceptions(function (Exceptions $exceptions): void {
         //

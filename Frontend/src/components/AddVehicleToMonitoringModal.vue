@@ -13,8 +13,8 @@
           <label>Pilih Kendaraan</label>
           <select v-model="form.kendaraan_id">
             <option value="">-- Pilih Kendaraan --</option>
-            <option v-for="k in availableKendaraan" :key="k.id" :value="k.id">
-              {{ k.nopol }} - {{ k.jenis_kendaraan }}
+            <option v-for="k in availableArmadaList" :key="k.id" :value="k.id">
+              {{ k.nopol }} - {{ k.jenis?.nama_jenis || k.jenis_kendaraan }}
             </option>
           </select>
           <p v-if="errors.kendaraan_id" class="err-msg">{{ errors.kendaraan_id }}</p>
@@ -27,39 +27,59 @@
       </div>
 
       <div class="modal-footer">
-        <button class="btn-cancel" @click="$emit('close')">Batal</button>
-        <button class="btn-submit" @click="submit">Tambahkan</button>
+        <button class="btn-cancel" @click="$emit('close')" :disabled="isSubmitting">Batal</button>
+        <button class="btn-submit" @click="submit" :disabled="isSubmitting">
+          {{ isSubmitting ? 'Menyimpan...' : 'Tambahkan' }}
+        </button>
       </div>
     </div>
   </div>
 </template>
 
 <script>
+import { mapState, mapActions } from 'vuex'
+
 export default {
   name: 'AddVehicleToMonitoringModal',
   props: { isOpen: { type: Boolean, required: true } },
   data() {
     return {
-      availableKendaraan: [
-        { id: 7, nopol: 'N 2222 STU', jenis_kendaraan: 'Hino' },
-        { id: 8, nopol: 'R 3333 VWX', jenis_kendaraan: 'Isuzu' },
-        { id: 9, nopol: 'S 4444 YZA', jenis_kendaraan: 'Fuso' },
-        { id: 10, nopol: 'K 5555 BCD', jenis_kendaraan: 'Hino' },
-        { id: 11, nopol: 'H 6666 EFG', jenis_kendaraan: 'Hino' },
-        { id: 12, nopol: 'G 7777 HIJ', jenis_kendaraan: 'Fuso' }
-      ],
       form: { kendaraan_id: '', initial_km: 0 },
-      errors: {}
+      errors: {},
+      isSubmitting: false
     }
   },
+  computed: {
+    ...mapState('monitoring', ['availableArmadaList'])
+  },
   watch: {
-    isOpen(v) { if (v) { this.form = { kendaraan_id: '', initial_km: 0 }; this.errors = {} } }
+    isOpen(v) { 
+      if (v) { 
+        this.form = { kendaraan_id: '', initial_km: 0 }; 
+        this.errors = {};
+        this.fetchAvailableArmada();
+      } 
+    }
   },
   methods: {
-    submit() {
-      if (!this.form.kendaraan_id) { this.errors = { kendaraan_id: 'Kendaraan harus dipilih' }; return }
-      this.$emit('vehicle-added', this.form)
-      this.$emit('close')
+    ...mapActions('monitoring', ['fetchAvailableArmada', 'createMonitoring']),
+    async submit() {
+      if (!this.form.kendaraan_id) { 
+        this.errors = { kendaraan_id: 'Kendaraan harus dipilih' }; 
+        return; 
+      }
+      
+      this.isSubmitting = true;
+      const res = await this.createMonitoring({
+        armada_id: this.form.kendaraan_id,
+        last_recorded_km: this.form.initial_km
+      });
+      this.isSubmitting = false;
+
+      if (res.success) {
+        this.$emit('vehicle-added', res.data)
+        this.$emit('close')
+      }
     }
   }
 }

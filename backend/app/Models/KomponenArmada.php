@@ -27,10 +27,10 @@ class KomponenArmada extends Model
         'target_km',
         'target_tanggal',
         'target_hari',
-        'progres_saat_ini',
         'km_terakhir_perawatan',
         'tanggal_terakhir_perawatan',
-        'status'
+        'status',
+        'has_identity',
     ];
 
     public function monitoring()

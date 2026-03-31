@@ -25,9 +25,6 @@ return new class extends Migration
             $table->date('tanggal_pelepasan')->nullable();              // KHUSUS: Ban (TGL LEPAS)
             $table->enum('status_ban_bekas', ['VULK', 'JUAL'])->nullable(); // KHUSUS: Ban (VULK/JUAL)
 
-            // KHUSUS OLI TRANSMISI & GARDAN (Sheet 2)
-            $table->decimal('jumlah_liter', 5, 1)->nullable();          // KHUSUS: Oli Transmisi & Gardan
-
             // SEMUA KOMPONEN
             $table->text('keterangan')->nullable();                     // Catatan tambahan (semua komponen)
 

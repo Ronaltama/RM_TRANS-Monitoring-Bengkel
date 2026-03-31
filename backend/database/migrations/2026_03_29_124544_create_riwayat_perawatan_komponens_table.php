@@ -14,15 +14,22 @@ return new class extends Migration
         Schema::create('riwayat_perawatan_komponen', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('komponen_armada_id');
+            $table->uuid('detail_komponen_armada_id')->nullable(); //jika perawatan terkait dengan detail komponen (misal: ban tertentu)
 
             $table->integer('km_saat_selesai')->nullable();
             $table->date('tanggal_selesai');
+            //jumlah liter
+            $table->decimal('jumlah_liter', 5, 1)->nullable(); //khusus untuk oli transmisi dan gardan
             $table->text('catatan')->nullable();
 
             $table->foreign('komponen_armada_id')
                 ->references('id')->on('komponen_armada')
                 ->cascadeOnDelete();
-        });
+
+            $table->foreign('detail_komponen_armada_id')
+                ->references('id')->on('detail_komponen_armada');
+            });
+
     }
 
     /**
