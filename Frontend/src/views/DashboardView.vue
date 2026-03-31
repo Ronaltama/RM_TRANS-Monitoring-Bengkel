@@ -99,6 +99,7 @@
 </template>
 
 <script>
+import { mapState, mapActions, mapGetters } from 'vuex'
 import Sidebar from '@/components/Sidebar.vue'
 
 export default {
@@ -106,39 +107,51 @@ export default {
   components: { Sidebar },
   data() {
     return {
-      stats: [
+      reminders: [] // Ini nanti bisa dinamis juga dari API monitoring
+    }
+  },
+  computed: {
+    ...mapState('armada', ['loading']),
+    ...mapGetters('armada', ['armadaList']),
+
+    todayDate() {
+      return new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
+    },
+
+    stats() {
+      return [
         {
           label: 'Total Kendaraan',
-          value: 12,
+          value: this.armadaList.length,
           desc: 'Terdaftar aktif',
           icon: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 17h14v-5H5v5zM5 12l2-7h10l2 7"/><circle cx="7.5" cy="17" r="2"/><circle cx="16.5" cy="17" r="2"/></svg>',
           iconBg: '#ede9fe', iconColor: '#6d28d9'
         },
         {
           label: 'Reminder Servis',
-          value: 5,
+          value: this.reminders.length,
           desc: 'Perlu tindakan segera',
           valueColor: '#dc2626',
           icon: '<svg width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M18 8A6 6 0 006 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 01-3.46 0"/></svg>',
           iconBg: '#fee2e2', iconColor: '#dc2626'
         }
-      ],
-      reminders: [
-        { id: 1, vehicle: 'B 1234 ABC — Hino', component: 'Oli Mesin', status: 'Kritis < 500 KM', badgeClass: 'badge-red', dotClass: 'dot-red' },
-        { id: 2, vehicle: 'D 5678 XYZ — Fuso', component: 'Ban Depan', status: 'Segera < 2000 KM', badgeClass: 'badge-yellow', dotClass: 'dot-yellow' },
-        { id: 3, vehicle: 'F 9012 GHI — Fusozu (Mitsubishi)', component: 'Aki', status: 'Perhatian < 4000 KM', badgeClass: 'badge-orange', dotClass: 'dot-orange' },
-        { id: 4, vehicle: 'AB 3456 JKL — Hino', component: 'Filter Udara', status: 'Kritis < 7 Hari', badgeClass: 'badge-red', dotClass: 'dot-red' },
-        { id: 5, vehicle: 'B 7890 MNO — Hino', component: 'Kopling', status: 'Segera < 12 Hari', badgeClass: 'badge-yellow', dotClass: 'dot-yellow' }
       ]
     }
   },
-  computed: {
-    todayDate() {
-      return new Date().toLocaleDateString('id-ID', { weekday: 'long', day: 'numeric', month: 'long', year: 'numeric' })
-    }
+  mounted() {
+    this.fetchData()
   },
   methods: {
-    refresh() {}
+    ...mapActions('armada', ['fetchArmada']),
+
+    async fetchData() {
+      await this.fetchArmada()
+      // Fetch data lain jika ada
+    },
+
+    refresh() {
+      this.fetchData()
+    }
   }
 }
 </script>
