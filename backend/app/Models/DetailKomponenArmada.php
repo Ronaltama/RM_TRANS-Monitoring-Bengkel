@@ -24,7 +24,6 @@ class DetailKomponenArmada extends Model
         'komponen_armada_id',
         'nomor_seri',
         'nomor_stamp',
-        'posisi_ban',
         'jenis_ban',
         'ukuran',
         'merk_tipe',

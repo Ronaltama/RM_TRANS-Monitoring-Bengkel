@@ -15,7 +15,7 @@ return new class extends Migration
             $table->uuid('id')->primary();
             $table->uuid('armada_id')->unique();
             $table->integer('last_recorded_km')->default(0);
-            $table->enum('status', ['aktif', 'nonaktif']);
+            $table->enum('status', ['aktif', 'nonaktif'])->default('aktif');
             $table->enum('spedo_status', ['HIDUP', 'MATI'])->default('HIDUP');
             $table->date('tanggal_mulai_monitoring');
             $table->text('keterangan')->nullable();
