@@ -29,6 +29,8 @@ class ArmadaController extends Controller
             'jenis_armada_id' => $request->jenis_armada_id
         ]);
 
+        $armada->load('jenis');
+
         return response()->json([
             'message' => 'Armada berhasil ditambahkan',
             'data' => $armada
@@ -65,6 +67,8 @@ class ArmadaController extends Controller
             'nopol' => $request->nopol,
             'jenis_armada_id' => $request->jenis_armada_id
         ]);
+
+        $armada->load('jenis');
 
         return response()->json([
             'message' => 'Armada berhasil diupdate',

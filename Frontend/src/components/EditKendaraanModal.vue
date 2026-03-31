@@ -2,7 +2,6 @@
   <transition name="modal-fade">
     <div v-if="isOpen" class="modal-overlay" @click.self="$emit('close')">
       <div class="modal-box">
-
         <div class="modal-header">
           <div class="modal-header-left">
             <div class="modal-icon">
@@ -23,16 +22,19 @@
           </button>
         </div>
 
-        <form @submit.prevent="$emit('kendaraan-updated', form)" class="modal-body">
+        <form @submit.prevent="handleSubmit" class="modal-body">
           <div class="form-group">
             <label>Nomor Polisi <span class="req">*</span></label>
             <input v-model="form.nopol" type="text" placeholder="B 1234 ABC" required />
           </div>
+          
           <div class="form-group">
             <label>Merk Truk <span class="req">*</span></label>
-            <select v-model="form.jenis_kendaraan" required>
+            <select v-model="form.jenis_armada_id" required>
               <option value="" disabled>— Pilih Merk —</option>
-              <option v-for="m in merks" :key="m" :value="m">{{ m }}</option>
+              <option v-for="merk in jenisArmadaList" :key="merk.id" :value="merk.id">
+                {{ merk.nama_jenis }}
+              </option>
             </select>
           </div>
 
@@ -44,13 +46,14 @@
             </button>
           </div>
         </form>
-
       </div>
     </div>
   </transition>
 </template>
 
 <script>
+import { mapGetters, mapActions } from 'vuex'
+
 export default {
   name: 'EditKendaraanModal',
   props: {
@@ -59,25 +62,49 @@ export default {
   },
   data() {
     return {
-      form: { jenis_kendaraan: '', nopol: '' },
-      merks: ['Hino', 'Fuso', 'Fusozu (Mitsubishi)']
+      form: { 
+        nopol: '', 
+        jenis_armada_id: '' 
+      }
     }
+  },
+  computed: {
+    ...mapGetters('armada', ['jenisArmadaList'])
   },
   watch: {
     kendaraan: {
       handler(v) {
         if (v) {
           this.form.nopol = v.nopol || ''
-          this.form.jenis_kendaraan = v.jenis_kendaraan || ''
+          this.form.jenis_armada_id = v.jenis_armada_id || ''
         }
       },
-      immediate: true, deep: true
+      immediate: true,
+      deep: true
+    },
+    isOpen(v) {
+      if (v) {
+        this.fetchJenisArmada()
+      }
+    }
+  },
+  methods: {
+    ...mapActions('armada', ['fetchJenisArmada']),
+    
+    handleSubmit() {
+      if (!this.form.nopol || !this.form.jenis_armada_id) return
+      
+      this.$emit('kendaraan-updated', {
+        nopol: this.form.nopol.trim().toUpperCase(),
+        jenis_armada_id: this.form.jenis_armada_id
+      })
     }
   }
 }
 </script>
 
 <style scoped>
+/* Style sama seperti sebelumnya */
 @import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
 
 .modal-overlay {
@@ -87,6 +114,7 @@ export default {
   z-index: 50; padding: 1rem;
   backdrop-filter: blur(2px);
 }
+
 .modal-box {
   background: #fff;
   border-radius: 18px;
@@ -95,11 +123,13 @@ export default {
   font-family: 'Poppins', sans-serif;
   overflow: hidden;
 }
+
 .modal-header {
   display: flex; justify-content: space-between; align-items: center;
   padding: 1.25rem 1.5rem;
   border-bottom: 1px solid #f0f0f8;
 }
+
 .modal-header-left { display: flex; align-items: center; gap: 0.75rem; }
 .modal-icon {
   width: 40px; height: 40px;
@@ -108,13 +138,16 @@ export default {
   display: flex; align-items: center; justify-content: center;
   flex-shrink: 0;
 }
+
 .modal-title { font-size: 0.95rem; font-weight: 600; color: #1e1d4c; }
 .modal-sub { font-size: 0.75rem; color: #9ca3af; margin-top: 1px; }
+
 .close-btn {
   background: #f5f5fb; border: none; border-radius: 8px;
   color: #9ca3af; cursor: pointer; padding: 7px;
   display: flex; align-items: center; transition: all 0.15s;
 }
+
 .close-btn:hover { background: #f0f0f0; color: #374151; }
 
 .modal-body { padding: 1.25rem 1.5rem; }
@@ -133,16 +166,19 @@ input, select {
   box-sizing: border-box;
   transition: border-color 0.2s, box-shadow 0.2s;
 }
+
 input:focus, select:focus {
   border-color: #3E3D90;
   box-shadow: 0 0 0 3px rgba(62,61,144,0.1);
 }
+
 input::placeholder { color: #c0c0d0; }
 
 .modal-footer {
   display: flex; gap: 0.65rem;
   padding-top: 0.5rem;
 }
+
 .btn-cancel {
   flex: 1; padding: 0.65rem;
   background: #fff; border: 1.5px solid #e8e8f0;
@@ -150,7 +186,9 @@ input::placeholder { color: #c0c0d0; }
   font-size: 0.83rem; font-weight: 500; color: #6b7280;
   cursor: pointer; transition: all 0.15s;
 }
+
 .btn-cancel:hover { background: #f5f5fb; }
+
 .btn-submit {
   flex: 1; display: flex; align-items: center; justify-content: center; gap: 6px;
   padding: 0.65rem;
@@ -161,6 +199,7 @@ input::placeholder { color: #c0c0d0; }
   box-shadow: 0 4px 12px rgba(62,61,144,0.3);
   transition: background 0.15s, transform 0.1s;
 }
+
 .btn-submit:hover { background: #4c4bb0; transform: translateY(-1px); }
 
 .modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
