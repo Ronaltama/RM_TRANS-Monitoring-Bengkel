@@ -22,7 +22,6 @@ class CategoryComponen extends Model
     protected $fillable = [
         'id',
         'nama_kategori',
-        'icon'
     ];
 
     public function komponen()

@@ -14,7 +14,6 @@ return new class extends Migration
         Schema::create('category_componen', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->string('nama_kategori', 100);
-            $table->string('icon', 50)->nullable();
         });
     }
 
