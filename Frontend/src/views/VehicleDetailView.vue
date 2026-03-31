@@ -42,13 +42,17 @@
             <div class="section-actions">
               <div class="filter-tabs">
                 <button
-                  v-for="cat in filterCategories"
+                  v-for="cat in dynamicFilterCategories"
                   :key="cat.value"
                   @click="selectedFilter = cat.value"
                   class="filter-tab"
                   :class="{ active: selectedFilter === cat.value }"
                 >{{ cat.label }}</button>
               </div>
+              <button class="btn-secondary" @click="showAddCategory = true">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+                Tambah Kategori
+              </button>
               <button class="btn-primary" @click="showAddComponent = true">
                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="13" height="13" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
                 Tambah Komponen
@@ -151,10 +155,10 @@
             </div>
           </div>
           <div class="modal-footer">
-            <button class="btn-cancel" @click="showUpdateKm = false">Batal</button>
-            <button class="btn-submit" @click="updateKm">
+            <button class="btn-cancel" @click="showUpdateKm = false" :disabled="isUpdatingKm">Batal</button>
+            <button class="btn-submit" @click="updateKm" :disabled="isUpdatingKm">
               <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Update
+              {{ isUpdatingKm ? 'Menyimpan...' : 'Update' }}
             </button>
           </div>
         </div>
@@ -188,7 +192,7 @@
               <label>Kategori</label>
               <select v-model="newComp.category">
                 <option value="">— Pilih Kategori —</option>
-                <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                <option v-for="c in dynamicCategories" :key="c" :value="c">{{ c }}</option>
               </select>
             </div>
             <div class="form-group">
@@ -233,7 +237,7 @@
             <div class="form-group">
               <label>Kategori</label>
               <select v-model="selectedComponent.category">
-                <option v-for="c in categories" :key="c" :value="c">{{ c }}</option>
+                <option v-for="c in dynamicCategories" :key="c" :value="c">{{ c }}</option>
               </select>
             </div>
           </div>
@@ -247,41 +251,30 @@
         </div>
       </div>
     </transition>
+
+    <AddCategoryModal :isOpen="showAddCategory" @close="showAddCategory = false" />
   </div>
 </template>
 
 <script>
 import Sidebar from '@/components/Sidebar.vue'
+import AddCategoryModal from '@/components/AddCategoryModal.vue'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'VehicleDetailView',
-  components: { Sidebar },
+  components: { Sidebar, AddCategoryModal },
   data() {
     return {
       searchQuery: '',
       selectedFilter: 'all',
-      filterCategories: [
-        { label: 'Semua', value: 'all' },
-        { label: 'Ban', value: 'Ban' },
-        { label: 'Oli', value: 'Oli' },
-        { label: 'Accu', value: 'Accu' },
-        { label: 'Rem', value: 'Rem' },
-      ],
       showUpdateKm: false,
       showAddComponent: false,
       showEditComponent: false,
+      showAddCategory: false,
       selectedComponent: null,
       newTotalKm: null,
       newComp: { name: '', category: '', targetKm: 10000 },
-      categories: ['Ban', 'Oli', 'Accu', 'Rem', 'Kopling', 'Filter', 'Lainnya'],
-      vehicles: {
-        1: { plat_nomor: 'B 1234 ABC', jenis_kendaraan: 'Hino', total_km: 87500 },
-        2: { plat_nomor: 'D 5678 XYZ', jenis_kendaraan: 'Mitsubishi', total_km: 55200 },
-        3: { plat_nomor: 'F 9012 GHI', jenis_kendaraan: 'Isuzu', total_km: 120000 },
-        4: { plat_nomor: 'AB 3456 JKL', jenis_kendaraan: 'Toyota', total_km: 34800 },
-        5: { plat_nomor: 'B 7890 MNO', jenis_kendaraan: 'Hino', total_km: 98700 },
-        6: { plat_nomor: 'L 1111 PQR', jenis_kendaraan: 'Mitsubishi', total_km: 67300 }
-      },
       nextCompId: 10,
       components: [
         { id: 1, name: 'Ban Depan Kiri', category: 'Ban', health: 25, remaining: '450 km lagi' },
@@ -297,9 +290,28 @@ export default {
     }
   },
   computed: {
+    ...mapState('monitoring', ['currentMonitoring']),
+    ...mapState('logKilometer', { isUpdatingKm: 'loading' }),
+    ...mapState('kategoriKomponen', ['kategoriList']),
+    dynamicCategories() {
+      return this.kategoriList.map(item => item.nama_kategori);
+    },
+    dynamicFilterCategories() {
+      const filters = [{ label: 'Semua', value: 'all' }];
+      this.kategoriList.forEach(item => {
+         filters.push({ label: item.nama_kategori, value: item.nama_kategori });
+      });
+      return filters;
+    },
     vehicle() {
-      const id = this.$route.params.id
-      return this.vehicles[id] || { plat_nomor: 'B 1234 ABC', jenis_kendaraan: 'Hino', total_km: 87500 }
+      if (!this.currentMonitoring) return {}
+      return {
+        id: this.currentMonitoring.id,
+        armada_id: this.currentMonitoring.armada_id,
+        plat_nomor: this.currentMonitoring.armada?.nopol || 'Unknown',
+        jenis_kendaraan: this.currentMonitoring.armada?.jenis?.nama_jenis || 'Unknown',
+        total_km: this.currentMonitoring.last_recorded_km || 0
+      }
     },
     filteredComponents() {
       let list = this.components
@@ -312,16 +324,28 @@ export default {
     }
   },
   methods: {
+    ...mapActions('monitoring', ['fetchMonitoringDetail']),
+    ...mapActions('logKilometer', ['createLog']),
+    ...mapActions('kategoriKomponen', ['fetchKategori']),
     formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
     getIconClass(h) { if (h < 30) return 'icon-red'; if (h < 60) return 'icon-orange'; return 'icon-green' },
     getBarClass(h) { if (h < 30) return 'bg-red'; if (h < 60) return 'bg-orange'; return 'bg-green' },
     getHealthClass(h) { if (h < 30) return 'text-red'; if (h < 60) return 'text-orange'; return 'text-green' },
-    updateKm() {
-      if (this.newTotalKm > this.vehicle.total_km) {
-        const id = this.$route.params.id
-        if (this.vehicles[id]) this.vehicles[id].total_km = this.newTotalKm
+    async updateKm() {
+      if (!this.newTotalKm || this.newTotalKm <= this.vehicle.total_km) {
+        alert('Kilometer baru harus lebih besar dari kilometer saat ini!');
+        return;
       }
-      this.showUpdateKm = false; this.newTotalKm = null
+      const res = await this.createLog({
+        armada_id: this.vehicle.armada_id,
+        odometer_km: this.newTotalKm
+      });
+      if (res.success) {
+        this.showUpdateKm = false; 
+        this.newTotalKm = null;
+        // fetch monitoring detail again to update the topbar number
+        this.fetchMonitoringDetail(this.$route.params.id);
+      }
     },
     markComplete(comp) {
       if (!confirm('Reset "' + comp.name + '" ke 100%?')) return
@@ -336,6 +360,10 @@ export default {
       this.components.push({ id: this.nextCompId++, name: this.newComp.name, category: this.newComp.category, health: 100, remaining: this.formatNumber(this.newComp.targetKm) + ' km lagi' })
       this.newComp = { name: '', category: '', targetKm: 10000 }; this.showAddComponent = false
     }
+  },
+  mounted() {
+    this.fetchMonitoringDetail(this.$route.params.id);
+    this.fetchKategori();
   }
 }
 </script>
@@ -380,6 +408,9 @@ export default {
 .filter-tab { padding: 0.3rem 0.7rem; border: none; background: none; border-radius: 7px; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; }
 .filter-tab.active { background: #fff; color: #3E3D90; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
 .filter-tab:hover:not(.active) { color: #3E3D90; }
+
+.btn-secondary { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #f0f0f8; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.15s; }
+.btn-secondary:hover { background: #e2e2ec; border-color: #d0d0dc; }
 
 .btn-primary { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #3E3D90; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: background 0.15s, transform 0.1s; }
 .btn-primary:hover { background: #4c4bb0; transform: translateY(-1px); }

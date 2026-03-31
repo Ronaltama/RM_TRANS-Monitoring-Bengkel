@@ -24,7 +24,6 @@ class DetailKomponenArmada extends Model
         'komponen_armada_id',
         'nomor_seri',
         'nomor_stamp',
-        'posisi_ban',
         'jenis_ban',
         'ukuran',
         'merk_tipe',
@@ -32,7 +31,6 @@ class DetailKomponenArmada extends Model
         'harga',
         'tanggal_pemasangan',
         'km_pemasangan',
-        'jumlah_liter',
         'tanggal_pelepasan',
         'status_ban_bekas',
         'keterangan'
@@ -41,5 +39,10 @@ class DetailKomponenArmada extends Model
     public function komponen()
     {
         return $this->belongsTo(KomponenArmada::class, 'komponen_armada_id');
+    }
+
+    public function riwayatPerawatan()
+    {
+        return $this->hasMany(RiwayatPerawatanKomponen::class, 'detail_komponen_armada_id');
     }
 }

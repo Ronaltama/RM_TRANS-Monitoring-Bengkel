@@ -73,23 +73,23 @@
                 >
                   <td>
                     <div class="nopol-cell">
-                      <span class="nopol-text">{{ item.plat_nomor }}</span>
-                      <span v-if="item.critical > 0" class="critical-badge">
+                      <span class="nopol-text">{{ getPlatNomor(item) }}</span>
+                      <span v-if="getCriticalCount(item) > 0" class="critical-badge">
                         <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2L1 21h22L12 2z"/></svg>
-                        {{ item.critical }} kritis
+                        {{ getCriticalCount(item) }} kritis
                       </span>
                     </div>
                   </td>
                   <td>
-                    <span class="merk-chip">{{ item.jenis_kendaraan }}</span>
+                    <span class="merk-chip">{{ getJenisKendaraan(item) }}</span>
                   </td>
                   <td>
-                    <span class="km-text">{{ formatNumber(item.total_km) }} <span class="km-unit">km</span></span>
+                    <span class="km-text">{{ formatNumber(item.last_recorded_km) }} <span class="km-unit">km</span></span>
                   </td>
                   <td>
-                    <span class="status-dot" :class="item.critical > 0 ? 'dot-warn' : 'dot-ok'"></span>
-                    <span class="status-text" :class="item.critical > 0 ? 'text-warn' : 'text-ok'">
-                      {{ item.critical > 0 ? 'Perlu Perhatian' : 'Normal' }}
+                    <span class="status-dot" :class="getCriticalCount(item) > 0 ? 'dot-warn' : 'dot-ok'"></span>
+                    <span class="status-text" :class="getCriticalCount(item) > 0 ? 'text-warn' : 'text-ok'">
+                      {{ getCriticalCount(item) > 0 ? 'Perlu Perhatian' : 'Normal' }}
                     </span>
                   </td>
                   <td @click.stop>
@@ -116,6 +116,7 @@
 <script>
 import Sidebar from '@/components/Sidebar.vue'
 import AddVehicleToMonitoringModal from '@/components/AddVehicleToMonitoringModal.vue'
+import { mapState, mapActions } from 'vuex'
 
 export default {
   name: 'MonitoringKendaraanView',
@@ -123,33 +124,45 @@ export default {
   data() {
     return {
       searchQuery: '',
-      showAdd: false,
-      monitoringList: [
-        { id: 1, plat_nomor: 'B 1234 ABC', jenis_kendaraan: 'Hino', total_km: 87500, critical: 2 },
-        { id: 2, plat_nomor: 'D 5678 XYZ', jenis_kendaraan: 'Fuso', total_km: 55200, critical: 1 },
-        { id: 3, plat_nomor: 'F 9012 GHI', jenis_kendaraan: 'Fusozu (Mitsubishi)', total_km: 120000, critical: 0 },
-        { id: 4, plat_nomor: 'AB 3456 JKL', jenis_kendaraan: 'Hino', total_km: 34800, critical: 3 },
-        { id: 5, plat_nomor: 'B 7890 MNO', jenis_kendaraan: 'Hino', total_km: 98700, critical: 0 },
-        { id: 6, plat_nomor: 'L 1111 PQR', jenis_kendaraan: 'Fuso', total_km: 67300, critical: 1 }
-      ]
+      showAdd: false
     }
   },
   computed: {
+    ...mapState('monitoring', ['monitoringList', 'loading']),
     filteredList() {
+      if (!this.monitoringList) return []
       if (!this.searchQuery) return this.monitoringList
       const q = this.searchQuery.toLowerCase()
-      return this.monitoringList.filter(i =>
-        i.plat_nomor.toLowerCase().includes(q) || i.jenis_kendaraan.toLowerCase().includes(q)
-      )
+      return this.monitoringList.filter(i => {
+        const nopol = i.armada?.nopol || i.plat_nomor || ''
+        const jenis = i.armada?.jenis?.nama_jenis || i.jenis_kendaraan || ''
+        return nopol.toLowerCase().includes(q) || jenis.toLowerCase().includes(q)
+      })
     }
   },
+  mounted() {
+    this.fetchMonitoring()
+  },
   methods: {
-    handleVehicleAdded() { this.showAdd = false },
-    removeVehicle(id) {
-      if (!confirm('Hapus kendaraan ini dari monitoring?')) return
-      this.monitoringList = this.monitoringList.filter(i => i.id !== id)
+    ...mapActions('monitoring', ['fetchMonitoring', 'deleteMonitoring']),
+    async handleVehicleAdded() { 
+      this.showAdd = false
     },
-    formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') }
+    async removeVehicle(id) {
+      await this.deleteMonitoring(id)
+    },
+    formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
+    
+    getPlatNomor(item) {
+      return item.armada?.nopol || item.plat_nomor || 'Unknown'
+    },
+    getJenisKendaraan(item) {
+      return item.armada?.jenis?.nama_jenis || item.jenis_kendaraan || 'Unknown'
+    },
+    getCriticalCount(item) {
+      // Logic for critical count could be implemented here
+      return item.critical || 0
+    }
   }
 }
 </script>

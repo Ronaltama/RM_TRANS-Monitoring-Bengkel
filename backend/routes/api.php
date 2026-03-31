@@ -15,10 +15,17 @@ Route::middleware('auth:sanctum')->group(function () {
     Route::apiResource('armada', ArmadaController::class);
     // Jenis Armada
     Route::apiResource('jenis_armada', JenisArmadaController::class);
-    // Category Componen (hanya Get all, create, delete)
+    // Categori Komponen (hanya Get all, create, delete)
     Route::get('kategori_komponen', [KategoriKomponenController::class, 'index']);
     Route::post('kategori_komponen', [KategoriKomponenController::class, 'store']);
     Route::delete('kategori_komponen/{id}', [KategoriKomponenController::class, 'destroy']);
+
+    // Monitoring Armada Aktif
+    Route::get('monitoring_armada_aktif/available', [\App\Http\Controllers\Api\MonitoringAktif\MonitoringArmadaAktifController::class, 'availableArmada']);
+    Route::apiResource('monitoring_armada_aktif', \App\Http\Controllers\Api\MonitoringAktif\MonitoringArmadaAktifController::class)->except(['create', 'edit', 'update']);
+
+    // Log Kilometer
+    Route::apiResource('log_kilometer', \App\Http\Controllers\Api\LogKilometer\LogKilometerController::class)->only(['index', 'store']);
 
     // Logout
     Route::post('logout', [AuthController::class, 'logout']);

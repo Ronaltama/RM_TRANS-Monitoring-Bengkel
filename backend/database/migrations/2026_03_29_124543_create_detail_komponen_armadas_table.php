@@ -6,45 +6,27 @@ use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
 {
-    /**
-     * Run the migrations.
-     */
     public function up(): void
     {
         Schema::create('detail_komponen_armada', function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->uuid('komponen_armada_id');
 
-            $table->string('nomor_seri', 50)->nullable();
-            $table->string('nomor_stamp', 50)->nullable();
+            // KHUSUS BAN (Sheet 6)
+            $table->string('nomor_seri', 50)->nullable();               // khususu NO SERI ban dan accu
+            $table->string('nomor_stamp', 50)->nullable();              // NO STAMP ban
+            $table->enum('jenis_ban', ['ORI', 'VULK'])->nullable();     // ORI / VULK
+            $table->string('ukuran', 50)->nullable();                   // Ukuran ban
+            $table->string('merk_tipe', 100)->nullable();               // Merk / Type ban
+            $table->string('pemasok', 100)->nullable();                 // Supplier
+            $table->decimal('harga', 12, 2)->nullable();                // Harga ban
+            $table->date('tanggal_pemasangan')->nullable();             // KHUSUS: Ban, Accu, Filter Udara
+            $table->integer('km_pemasangan')->nullable();               // KHUSUS: Ban (SPEDOMETER PEMASANGAN)
+            $table->date('tanggal_pelepasan')->nullable();              // KHUSUS: Ban (TGL LEPAS)
+            $table->enum('status_ban_bekas', ['VULK', 'JUAL'])->nullable(); // KHUSUS: Ban (VULK/JUAL)
 
-            $table->enum('posisi_ban', [
-                'depan_kiri',
-                'depan_kanan',
-                'tengah_kiri',
-                'tengah_kanan',
-                'belakang_kiri',
-                'belakang_kanan',
-                'cadangan'
-            ])->nullable();
-
-            $table->enum('jenis_ban', ['ORI', 'VULK'])->nullable();
-
-            $table->string('ukuran', 50)->nullable();
-            $table->string('merk_tipe', 100)->nullable();
-            $table->string('pemasok', 100)->nullable();
-
-            $table->decimal('harga', 12, 2)->nullable();
-
-            $table->date('tanggal_pemasangan')->nullable();
-            $table->integer('km_pemasangan')->nullable();
-
-            $table->decimal('jumlah_liter', 5, 1)->nullable();
-
-            $table->date('tanggal_pelepasan')->nullable();
-            $table->enum('status_ban_bekas', ['VULK', 'JUAL'])->nullable();
-
-            $table->text('keterangan')->nullable();
+            // SEMUA KOMPONEN
+            $table->text('keterangan')->nullable();                     // Catatan tambahan (semua komponen)
 
             $table->foreign('komponen_armada_id')
                 ->references('id')->on('komponen_armada')
@@ -52,11 +34,8 @@ return new class extends Migration
         });
     }
 
-    /**
-     * Reverse the migrations.
-     */
     public function down(): void
     {
-        Schema::dropIfExists('detail_komponen_armadas');
+        Schema::dropIfExists('detail_komponen_armada');
     }
 };

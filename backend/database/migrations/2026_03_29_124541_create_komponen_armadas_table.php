@@ -23,12 +23,11 @@ return new class extends Migration
             $table->date('target_tanggal')->nullable();
             $table->integer('target_hari')->nullable();
 
-            $table->integer('progres_saat_ini')->default(0);
-
             $table->integer('km_terakhir_perawatan')->nullable();
             $table->date('tanggal_terakhir_perawatan')->nullable();
 
             $table->enum('status', ['active', 'completed', 'overdue', 'removed']);
+            $table->boolean('has_identity')->default(false); // khusus untuk kategori ban dan accu yang memiliki detail
 
             $table->timestamps();
 
