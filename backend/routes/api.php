@@ -27,6 +27,12 @@ Route::middleware('auth:sanctum')->group(function () {
     // Log Kilometer
     Route::apiResource('log_kilometer', \App\Http\Controllers\Api\LogKilometer\LogKilometerController::class)->only(['index', 'store']);
 
+    // Komponen Armada
+    Route::get('monitoring_armada_aktif/{monitoring_id}/komponen', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'index']);
+    Route::post('monitoring_armada_aktif/{monitoring_id}/komponen', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'store']);
+    Route::post('komponen_armada/{id}/reset', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'reset']);
+    Route::delete('komponen_armada/{id}', [\App\Http\Controllers\Api\KomponenArmada\KomponenArmadaController::class, 'destroy']);
+
     // Logout
     Route::post('logout', [AuthController::class, 'logout']);
 });

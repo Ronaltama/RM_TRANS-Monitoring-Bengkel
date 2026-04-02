@@ -62,14 +62,15 @@
 </template>
 
 <script>
-import monitoringService from '@/services/monitoringService.js'
+import { logKilometerApi } from '@/modules/logKilometer/api/logKilometerApi'
 
 export default {
   name: 'UpdateKilometerModal',
   props: {
     isOpen: { type: Boolean, required: true },
-    currentKm: { type: Number, required: true },
-    monitoringId: { required: true }
+    currentKm: { type: Number, default: 0 },
+    monitoringId: { required: true },
+    armadaId: { required: true }
   },
   data() {
     return {
@@ -94,10 +95,17 @@ export default {
         return
       }
       this.loading = true
-      const additional = this.form.newKm - this.currentKm
-      const payload = { base_km: this.currentKm, additional_km: additional, new_km: this.form.newKm }
-      monitoringService.updateKilometer(this.monitoringId, payload)
-        .then(res => { if (res.data.success) { this.$emit('updated', res.data.data); this.$emit('close') } })
+      const payload = { 
+          armada_id: this.armadaId, 
+          odometer_km: this.form.newKm 
+      }
+      logKilometerApi.create(payload)
+        .then(res => { 
+            if (res.data.status === 'success') { 
+                this.$emit('updated', res.data.data); 
+                this.$emit('close') 
+            } 
+        })
         .catch(err => { this.errorMsg = err.response?.data?.message || 'Gagal mengupdate kilometer' })
         .finally(() => { this.loading = false })
     },
