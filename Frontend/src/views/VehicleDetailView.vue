@@ -70,7 +70,10 @@
 
           <!-- Component List -->
           <div class="component-list">
-            <div v-if="filteredComponents.length === 0" class="empty-state">
+            <div v-if="loadingComponents" class="loading-state">
+                <p>Memuat komponen...</p>
+            </div>
+            <div v-else-if="filteredComponents.length === 0" class="empty-state">
               <svg width="32" height="32" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="12" r="3"/><path d="M12 1v6m0 6v6m5.2-13.2l-4.2 4.2m0 6l4.2 4.2M23 12h-6m-6 0H1"/></svg>
               <p>Tidak ada komponen ditemukan</p>
             </div>
@@ -86,21 +89,27 @@
               </div>
               <div class="comp-info">
                 <div class="comp-name-row">
-                  <span class="comp-name">{{ comp.name }}</span>
-                  <span class="comp-category">{{ comp.category }}</span>
+                  <span class="comp-name">{{ comp.nama_komponen }}</span>
+                  <span class="comp-category">{{ comp.kategori?.nama_kategori }}</span>
+                  <span v-if="comp.has_identity" class="identity-badge" :title="comp.detail[0]?.nomor_seri">
+                    ID: {{ comp.detail[0]?.nomor_seri || '-' }}
+                  </span>
                 </div>
                 <div class="progress-bar">
-                  <div class="progress-fill" :class="getBarClass(comp.health)" :style="{ width: (100 - comp.health) + '%' }"></div>
+                  <div class="progress-fill" :class="getBarClass(comp.health)" :style="{ width: comp.health + '%' }"></div>
                 </div>
                 <div class="comp-stats">
                   <span :class="getHealthClass(comp.health)">{{ comp.health }}% health</span>
                   <span class="dot">·</span>
                   <span class="remaining-text">{{ comp.remaining }}</span>
+                  <span class="dot">·</span>
+                  <span class="tracking-type">{{ comp.tipe_pelacakan.toUpperCase() }}</span>
                 </div>
               </div>
               <div class="comp-actions">
-                <button class="icon-btn green" title="Mark Complete" @click="markComplete(comp)">
-                  <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2.5"><polyline points="20,6 9,17 4,12"/></svg>
+                <button class="reset-btn" @click="openResetModal(comp)">
+                  <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg>
+                  Reset
                 </button>
                 <button class="icon-btn blue" title="Edit" @click="selectedComponent = comp; showEditComponent = true">
                   <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="14" height="14" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
@@ -115,155 +124,131 @@
       </div>
     </main>
 
-    <!-- Update KM Modal -->
-    <transition name="modal-fade">
-      <div v-if="showUpdateKm" class="modal-overlay" @click.self="showUpdateKm = false">
-        <div class="modal-box">
-          <div class="modal-header">
-            <div class="modal-header-left">
-              <div class="modal-icon" style="background:#f0f0fb;color:#3E3D90;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </div>
-              <div>
-                <h3 class="modal-title">Update Kilometer</h3>
-                <p class="modal-sub">Perbarui data jarak kendaraan</p>
-              </div>
-            </div>
-            <button class="close-btn" @click="showUpdateKm = false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="info-box">
-              <p class="info-label">Kilometer Saat Ini</p>
-              <p class="info-value">{{ formatNumber(vehicle.total_km) }} <span class="info-unit">km</span></p>
-            </div>
-            <div class="form-group">
-              <label>KM Saat Ini (di Speedometer)</label>
-              <input v-model.number="newTotalKm" type="number" min="0" placeholder="Contoh: 85000" />
-              <p class="hint">Masukkan angka KM tanpa pemisah (contoh: 85000)</p>
-            </div>
-            <div class="preview-box">
-              <p class="preview-label">Selisih Jarak Ditempuh</p>
-              <p class="preview-value" v-if="(newTotalKm || 0) > vehicle.total_km" style="color: #16a34a;">
-                + {{ formatNumber((newTotalKm || 0) - vehicle.total_km) }} <span class="preview-unit">km</span>
-              </p>
-              <p class="preview-value" v-else-if="(newTotalKm || 0) > 0" style="color: #dc2626; font-size: 0.9rem;">
-                Harus > {{ formatNumber(vehicle.total_km) }} km
-              </p>
-              <p class="preview-value" v-else>0 <span class="preview-unit">km</span></p>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" @click="showUpdateKm = false" :disabled="isUpdatingKm">Batal</button>
-            <button class="btn-submit" @click="updateKm" :disabled="isUpdatingKm">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              {{ isUpdatingKm ? 'Menyimpan...' : 'Update' }}
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- Add Component Modal -->
-    <transition name="modal-fade">
-      <div v-if="showAddComponent" class="modal-overlay" @click.self="showAddComponent = false">
-        <div class="modal-box">
-          <div class="modal-header">
-            <div class="modal-header-left">
-              <div class="modal-icon" style="background:#ede9fe;color:#6d28d9;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
-              </div>
-              <div>
-                <h3 class="modal-title">Tambah Komponen</h3>
-                <p class="modal-sub">Daftarkan komponen baru</p>
-              </div>
-            </div>
-            <button class="close-btn" @click="showAddComponent = false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Nama Komponen</label>
-              <input v-model="newComp.name" type="text" placeholder="Contoh: Ban Depan Kiri" />
-            </div>
-            <div class="form-group">
-              <label>Kategori</label>
-              <select v-model="newComp.category">
-                <option value="">— Pilih Kategori —</option>
-                <option v-for="c in dynamicCategories" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </div>
-            <div class="form-group">
-              <label>Target KM</label>
-              <input v-model.number="newComp.targetKm" type="number" placeholder="Contoh: 10000" />
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" @click="showAddComponent = false">Batal</button>
-            <button class="btn-submit" @click="addComponent">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Tambah
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
-    <!-- Edit Component Modal -->
-    <transition name="modal-fade">
-      <div v-if="showEditComponent && selectedComponent" class="modal-overlay" @click.self="showEditComponent = false">
-        <div class="modal-box">
-          <div class="modal-header">
-            <div class="modal-header-left">
-              <div class="modal-icon" style="background:#f0f0fb;color:#3E3D90;">
-                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 013 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-              </div>
-              <div>
-                <h3 class="modal-title">Edit Komponen</h3>
-                <p class="modal-sub">{{ selectedComponent.name }}</p>
-              </div>
-            </div>
-            <button class="close-btn" @click="showEditComponent = false">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" width="16" height="16" stroke-width="2"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
-            </button>
-          </div>
-          <div class="modal-body">
-            <div class="form-group">
-              <label>Nama Komponen</label>
-              <input v-model="selectedComponent.name" type="text" />
-            </div>
-            <div class="form-group">
-              <label>Kategori</label>
-              <select v-model="selectedComponent.category">
-                <option v-for="c in dynamicCategories" :key="c" :value="c">{{ c }}</option>
-              </select>
-            </div>
-          </div>
-          <div class="modal-footer">
-            <button class="btn-cancel" @click="showEditComponent = false">Batal</button>
-            <button class="btn-submit" @click="showEditComponent = false">
-              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="20 6 9 17 4 12"/></svg>
-              Simpan
-            </button>
-          </div>
-        </div>
-      </div>
-    </transition>
-
+    <!-- Modals -->
+    <UpdateKilometerModal 
+      :isOpen="showUpdateKm" 
+      :currentKm="vehicle.total_km || 0" 
+      :monitoringId="$route.params.id"
+      :armadaId="vehicle.armada_id"
+      @close="showUpdateKm = false" 
+      @updated="onKmUpdated" 
+    />
+    <AddComponentModal :isOpen="showAddComponent" :monitoringId="$route.params.id" @close="showAddComponent = false" @component-added="loadComponents" />
     <AddCategoryModal :isOpen="showAddCategory" @close="showAddCategory = false" />
+    
+    <!-- Reset Component Modal -->
+    <transition name="modal-fade">
+        <div v-if="showResetModal" class="modal-overlay" @click.self="showResetModal = false">
+            <div class="modal-box reset-box">
+                <div class="modal-header">
+                    <div class="modal-header-left">
+                        <div class="modal-icon reset-icon">
+                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polyline points="23 4 23 10 17 10"/><path d="M20.49 15a9 9 0 1 1-2.12-9.36L23 10"/></svg>
+                        </div>
+                        <div>
+                            <h3 class="modal-title">Reset / Ganti Komponen</h3>
+                            <p class="modal-sub">{{ resettingComp?.nama_komponen }}</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-body">
+                    <p class="reset-desc">Mereset komponen akan mencatat riwayat perawatan dan memulai siklus baru dari 100%.</p>
+                    
+                    <div class="form-group">
+                        <label>Catatan Perawatan</label>
+                        <textarea v-model="resetForm.catatan" placeholder="Contoh: Ganti ban baru karena sudah botak"></textarea>
+                    </div>
+
+                    <div class="grid-form">
+                        <div class="form-group">
+                            <label>Tgl Lepas (Lama) <span class="req">*</span></label>
+                            <input v-model="resetForm.tanggal_pelepasan" type="date" />
+                        </div>
+                        <div v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('oli')" class="form-group">
+                            <label>Jumlah Liter</label>
+                            <input v-model.number="resetForm.jumlah_liter" type="number" step="0.1" />
+                        </div>
+                    </div>
+
+                    <!-- If it had identity, and user wants to provide replacement -->
+                    <div v-if="resettingComp?.has_identity" class="replacement-section">
+                        <div class="replacement-header">Identitas Baru (Pengganti)</div>
+                        
+                        <div class="grid-form">
+                            <div class="form-group">
+                                <label>No Seri Baru</label>
+                                <input v-model="resetForm.new_detail.nomor_seri" type="text" />
+                            </div>
+                            <div class="form-group" v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('ban')">
+                                <label>No Stamp Baru</label>
+                                <input v-model="resetForm.new_detail.nomor_stamp" type="text" />
+                            </div>
+                        </div>
+
+                        <div v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('ban')" class="grid-form" style="margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Jenis Ban</label>
+                                <select v-model="resetForm.new_detail.jenis_ban">
+                                    <option value="ORI">ORI</option>
+                                    <option value="VULK">VULK</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Ukuran</label>
+                                <input v-model="resetForm.new_detail.ukuran" type="text" />
+                            </div>
+                        </div>
+
+                        <div class="grid-form" style="margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Merk / Tipe</label>
+                                <input v-model="resetForm.new_detail.merk_tipe" type="text" />
+                            </div>
+                            <div class="form-group">
+                                <label>Pemasok</label>
+                                <input v-model="resetForm.new_detail.pemasok" type="text" />
+                            </div>
+                        </div>
+
+                        <div class="grid-form" style="margin-top: 10px;">
+                            <div class="form-group">
+                                <label>Harga (Rp)</label>
+                                <input v-model.number="resetForm.new_detail.harga" type="number" />
+                            </div>
+                            <div class="form-group">
+                                <label>Tgl Pasang Baru</label>
+                                <input v-model="resetForm.new_detail.tanggal_pemasangan" type="date" />
+                            </div>
+                        </div>
+
+                        <div v-if="resettingComp?.kategori?.nama_kategori.toLowerCase().includes('ban')" class="form-group" style="margin-top: 10px;">
+                            <label>KM Pasang Baru</label>
+                            <input v-model.number="resetForm.new_detail.km_pemasangan" type="number" />
+                        </div>
+                    </div>
+                </div>
+                <div class="modal-footer">
+                    <button class="btn-cancel" @click="showResetModal = false">Batal</button>
+                    <button class="btn-submit reset-submit" @click="submitReset">Reset Sekarang</button>
+                </div>
+            </div>
+        </div>
+    </transition>
   </div>
 </template>
 
 <script>
 import Sidebar from '@/components/Sidebar.vue'
 import AddCategoryModal from '@/components/AddCategoryModal.vue'
+import AddComponentModal from '@/components/AddComponentModal.vue'
+import UpdateKilometerModal from '@/components/UpdateKilometerModal.vue'
+import componentService from '@/services/componentService.js'
 import { mapState, mapActions } from 'vuex'
+import Swal from 'sweetalert2'
 
 export default {
   name: 'VehicleDetailView',
-  components: { Sidebar, AddCategoryModal },
+  components: { Sidebar, AddCategoryModal, AddComponentModal, UpdateKilometerModal },
   data() {
     return {
       searchQuery: '',
@@ -272,34 +257,35 @@ export default {
       showAddComponent: false,
       showEditComponent: false,
       showAddCategory: false,
-      selectedComponent: null,
-      newTotalKm: null,
-      newComp: { name: '', category: '', targetKm: 10000 },
-      nextCompId: 10,
-      components: [
-        { id: 1, name: 'Ban Depan Kiri', category: 'Ban', health: 25, remaining: '450 km lagi' },
-        { id: 2, name: 'Ban Depan Kanan', category: 'Ban', health: 30, remaining: '200 km lagi' },
-        { id: 3, name: 'Ban Belakang Kiri', category: 'Ban', health: 65, remaining: '3,500 km lagi' },
-        { id: 4, name: 'Ban Belakang Kanan', category: 'Ban', health: 70, remaining: '4,000 km lagi' },
-        { id: 5, name: 'Oli Mesin', category: 'Oli', health: 15, remaining: '5 hari lagi' },
-        { id: 6, name: 'Oli Transmisi', category: 'Oli', health: 55, remaining: '25 hari lagi' },
-        { id: 7, name: 'Accu', category: 'Accu', health: 80, remaining: '90 hari lagi' },
-        { id: 8, name: 'Rem Depan', category: 'Rem', health: 45, remaining: '2,200 km lagi' },
-        { id: 9, name: 'Filter Udara', category: 'Filter', health: 60, remaining: '3,000 km lagi' }
-      ]
+      showResetModal: false,
+      loadingComponents: false,
+      components: [],
+      resettingComp: null,
+      resetForm: {
+          catatan: '',
+          jumlah_liter: null,
+          tanggal_pelepasan: '',
+          new_detail: {
+              nomor_seri: '',
+              nomor_stamp: '',
+              jenis_ban: 'ORI',
+              ukuran: '',
+              merk_tipe: '',
+              pemasok: '',
+              harga: 0,
+              tanggal_pemasangan: '',
+              km_pemasangan: 0
+          }
+      }
     }
   },
   computed: {
     ...mapState('monitoring', ['currentMonitoring']),
-    ...mapState('logKilometer', { isUpdatingKm: 'loading' }),
     ...mapState('kategoriKomponen', ['kategoriList']),
-    dynamicCategories() {
-      return this.kategoriList.map(item => item.nama_kategori);
-    },
     dynamicFilterCategories() {
       const filters = [{ label: 'Semua', value: 'all' }];
       this.kategoriList.forEach(item => {
-         filters.push({ label: item.nama_kategori, value: item.nama_kategori });
+         filters.push({ label: item.nama_kategori, value: item.id });
       });
       return filters;
     },
@@ -315,64 +301,123 @@ export default {
     },
     filteredComponents() {
       let list = this.components
-      if (this.selectedFilter !== 'all') list = list.filter(c => c.category === this.selectedFilter)
+      if (this.selectedFilter !== 'all') {
+          list = list.filter(c => c.kategori_komponen_id === this.selectedFilter)
+      }
       if (this.searchQuery) {
         const q = this.searchQuery.toLowerCase()
-        list = list.filter(c => c.name.toLowerCase().includes(q) || c.category.toLowerCase().includes(q))
+        list = list.filter(c => 
+            c.nama_komponen.toLowerCase().includes(q) || 
+            c.kategori?.nama_kategori.toLowerCase().includes(q)
+        )
       }
       return [...list].sort((a, b) => a.health - b.health)
     }
   },
   methods: {
     ...mapActions('monitoring', ['fetchMonitoringDetail']),
-    ...mapActions('logKilometer', ['createLog']),
     ...mapActions('kategoriKomponen', ['fetchKategori']),
     formatNumber(n) { return (n || 0).toString().replace(/\B(?=(\d{3})+(?!\d))/g, ',') },
     getIconClass(h) { if (h < 30) return 'icon-red'; if (h < 60) return 'icon-orange'; return 'icon-green' },
     getBarClass(h) { if (h < 30) return 'bg-red'; if (h < 60) return 'bg-orange'; return 'bg-green' },
     getHealthClass(h) { if (h < 30) return 'text-red'; if (h < 60) return 'text-orange'; return 'text-green' },
-    async updateKm() {
-      if (!this.newTotalKm || this.newTotalKm <= this.vehicle.total_km) {
-        alert('Kilometer baru harus lebih besar dari kilometer saat ini!');
-        return;
-      }
-      const res = await this.createLog({
-        armada_id: this.vehicle.armada_id,
-        odometer_km: this.newTotalKm
-      });
-      if (res.success) {
-        this.showUpdateKm = false; 
-        this.newTotalKm = null;
-        // fetch monitoring detail again to update the topbar number
+    
+    async loadComponents() {
+        this.loadingComponents = true;
+        try {
+            const res = await componentService.getComponents(this.$route.params.id);
+            this.components = res.data.data;
+        } catch (err) {
+            console.error(err);
+        } finally {
+            this.loadingComponents = false;
+        }
+    },
+
+    onKmUpdated() {
         this.fetchMonitoringDetail(this.$route.params.id);
-      }
+        this.loadComponents(); // update health based on new KM
     },
-    markComplete(comp) {
-      if (!confirm('Reset "' + comp.name + '" ke 100%?')) return
-      comp.health = 100; comp.remaining = 'Baru direset'
+
+    openResetModal(comp) {
+        this.resettingComp = comp;
+        const today = new Date().toISOString().substr(0, 10);
+        this.resetForm = {
+            catatan: '',
+            jumlah_liter: null,
+            tanggal_pelepasan: today,
+            new_detail: { 
+                nomor_seri: '', 
+                nomor_stamp: '',
+                jenis_ban: 'ORI',
+                ukuran: '',
+                merk_tipe: '',
+                pemasok: '',
+                harga: 0,
+                tanggal_pemasangan: today,
+                km_pemasangan: this.vehicle.total_km
+            }
+        };
+        this.showResetModal = true;
     },
-    deleteComp(id) {
-      if (!confirm('Hapus komponen ini?')) return
-      this.components = this.components.filter(c => c.id !== id)
+
+    async submitReset() {
+        try {
+            const payload = {
+                catatan: this.resetForm.catatan,
+                jumlah_liter: this.resetForm.jumlah_liter,
+                tanggal_pelepasan: this.resetForm.tanggal_pelepasan
+            };
+            
+            // Only send new_detail if user typed a serial number
+            if (this.resetForm.new_detail.nomor_seri) {
+                payload.new_detail = { ...this.resetForm.new_detail };
+            }
+
+            const res = await componentService.resetComponent(this.resettingComp.id, payload);
+            if (res.data.status === 'success') {
+                Swal.fire('Berhasil', 'Komponen telah direset ke 100%', 'success');
+                this.showResetModal = false;
+                this.loadComponents();
+            }
+        } catch (err) {
+            const msg = err.response?.data?.message || 'Gagal mereset komponen';
+            Swal.fire('Error', msg, 'error');
+        }
     },
-    addComponent() {
-      if (!this.newComp.name || !this.newComp.category) return
-      this.components.push({ id: this.nextCompId++, name: this.newComp.name, category: this.newComp.category, health: 100, remaining: this.formatNumber(this.newComp.targetKm) + ' km lagi' })
-      this.newComp = { name: '', category: '', targetKm: 10000 }; this.showAddComponent = false
+
+    async deleteComp(id) {
+        const result = await Swal.fire({
+            title: 'Hapus Komponen?',
+            text: 'Data riwayat juga akan hilang!',
+            icon: 'warning',
+            showCancelButton: true,
+            confirmButtonColor: '#ef4444',
+            confirmButtonText: 'Ya, Hapus'
+        });
+        
+        if (result.isConfirmed) {
+            try {
+                await componentService.deleteComponent(id);
+                this.loadComponents();
+                Swal.fire('Terhapus', 'Komponen berhasil dihapus', 'success');
+            } catch (err) {
+                alert('Gagal menghapus komponen');
+            }
+        }
     }
   },
   mounted() {
     this.fetchMonitoringDetail(this.$route.params.id);
+    this.loadComponents();
     this.fetchKategori();
   }
 }
 </script>
 
-<style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
-</style>
-
 <style scoped>
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap');
+
 .page-layout { display: flex; min-height: 100vh; font-family: 'Poppins', sans-serif; }
 .main-content { flex: 1; background: #f0f0f8; display: flex; flex-direction: column; min-width: 0; }
 
@@ -404,28 +449,24 @@ export default {
 .section-sub { font-size: 0.72rem; color: #9ca3af; margin-top: 1px; }
 .section-actions { display: flex; align-items: center; gap: 0.65rem; flex-wrap: wrap; }
 
-.filter-tabs { display: flex; gap: 3px; background: #f5f5fb; border-radius: 9px; padding: 3px; }
-.filter-tab { padding: 0.3rem 0.7rem; border: none; background: none; border-radius: 7px; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; }
+.filter-tabs { display: flex; gap: 3px; background: #f5f5fb; border-radius: 9px; padding: 3px; overflow-x: auto; max-width: 300px; }
+.filter-tab { padding: 0.3rem 0.7rem; border: none; background: none; border-radius: 7px; font-family: 'Poppins', sans-serif; font-size: 0.78rem; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; white-space: nowrap; }
 .filter-tab.active { background: #fff; color: #3E3D90; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,0.08); }
-.filter-tab:hover:not(.active) { color: #3E3D90; }
 
 .btn-secondary { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #f0f0f8; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; color: #374151; cursor: pointer; transition: all 0.15s; }
-.btn-secondary:hover { background: #e2e2ec; border-color: #d0d0dc; }
-
-.btn-primary { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #3E3D90; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: background 0.15s, transform 0.1s; }
-.btn-primary:hover { background: #4c4bb0; transform: translateY(-1px); }
+.btn-primary { display: flex; align-items: center; gap: 6px; padding: 0.5rem 1rem; background: #3E3D90; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.8rem; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: all 0.15s; }
 
 /* SEARCH ROW */
 .search-row { padding: 0.85rem 1.5rem; border-bottom: 1px solid #f0f0f8; }
 .search-wrap { position: relative; max-width: 300px; }
 .search-icon { position: absolute; left: 11px; top: 50%; transform: translateY(-50%); color: #9ca3af; pointer-events: none; }
-.search-wrap input { width: 100%; padding: 0.6rem 1rem 0.6rem 32px; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; outline: none; background: #fff; color: #374151; transition: border-color 0.2s, box-shadow 0.2s; box-sizing: border-box; }
-.search-wrap input:focus { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62,61,144,0.1); }
-.search-wrap input::placeholder { color: #c0c0d0; }
+.search-wrap input { width: 100%; padding: 0.6rem 1rem 0.6rem 32px; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; outline: none; background: #fff; color: #374151; box-sizing: border-box; }
 
 /* COMPONENTS */
-.component-item { display: flex; align-items: center; gap: 1rem; padding: 1rem 1.5rem; border-bottom: 1px solid #f5f5fb; transition: background 0.1s; }
-.component-item:last-child { border-bottom: none; }
+.loading-state { padding: 3rem; text-align: center; color: #9ca3af; animation: pulse 1.5s infinite; }
+@keyframes pulse { 0% { opacity: 0.5; } 50% { opacity: 1; } 100% { opacity: 0.5; } }
+
+.component-item { display: flex; align-items: center; gap: 1rem; padding: 1.1rem 1.5rem; border-bottom: 1px solid #f5f5fb; transition: background 0.1s; }
 .component-item:hover { background: #faf9ff; }
 
 .comp-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
@@ -434,114 +475,72 @@ export default {
 .icon-green { background: #f0fdf4; color: #22c55e; }
 
 .comp-info { flex: 1; min-width: 0; }
-.comp-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; }
+.comp-name-row { display: flex; align-items: center; gap: 8px; margin-bottom: 7px; flex-wrap: wrap; }
 .comp-name { font-size: 0.85rem; font-weight: 600; color: #1e1d4c; }
 .comp-category { padding: 2px 7px; background: #f5f5fb; border: 1px solid #e8e8f0; color: #6b7280; border-radius: 5px; font-size: 0.68rem; font-weight: 500; }
+.identity-badge { font-size: 0.65rem; color: #3E3D90; background: #ede9fe; padding: 2px 6px; border-radius: 4px; font-weight: 600; cursor: help; }
 
 .progress-bar { background: #f0f0f8; border-radius: 999px; height: 6px; margin-bottom: 6px; overflow: hidden; }
-.progress-fill { height: 100%; border-radius: 999px; transition: width 0.4s ease; }
+.progress-fill { height: 100%; border-radius: 999px; transition: width 0.6s cubic-bezier(0.4, 0, 0.2, 1); }
 .bg-green { background: #22c55e; }
 .bg-orange { background: #f97316; }
 .bg-red { background: #ef4444; }
 
-.comp-stats { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; }
+.comp-stats { display: flex; align-items: center; gap: 6px; font-size: 0.75rem; flex-wrap: wrap; }
 .dot { color: #d1d5db; }
-.remaining-text { color: #9ca3af; }
+.remaining-text { color: #525252; font-weight: 500; }
+.tracking-type { color: #9ca3af; font-size: 0.65rem; letter-spacing: 0.5px; }
 .text-green { color: #16a34a; font-weight: 600; }
 .text-orange { color: #ea580c; font-weight: 600; }
 .text-red { color: #dc2626; font-weight: 600; }
 
-.comp-actions { display: flex; gap: 4px; flex-shrink: 0; }
-.icon-btn { width: 30px; height: 30px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 7px; cursor: pointer; color: #b0b0c8; transition: all 0.15s; }
-.icon-btn.green:hover { color: #22c55e; background: #f0fdf4; }
+.comp-actions { display: flex; gap: 4px; flex-shrink: 0; align-items: center; }
+.reset-btn { display: flex; align-items: center; gap: 5px; padding: 0.4rem 0.75rem; background: #f0fdf4; border: 1px solid #bbf7d0; color: #15803d; border-radius: 8px; font-size: 0.75rem; font-weight: 600; cursor: pointer; transition: all 0.15s; }
+.reset-btn:hover { background: #dcfce7; transform: translateY(-1px); }
+
+.icon-btn { width: 32px; height: 32px; display: flex; align-items: center; justify-content: center; border: none; background: none; border-radius: 8px; cursor: pointer; color: #b0b0c8; transition: all 0.15s; }
 .icon-btn.blue:hover { color: #3E3D90; background: #f0f0fb; }
 .icon-btn.delete:hover { color: #ef4444; background: #fff0f0; }
 
-.empty-state { padding: 3rem; text-align: center; color: #9ca3af; }
-.empty-state svg { margin: 0 auto 0.6rem; display: block; }
-.empty-state p { font-size: 0.85rem; }
+/* MODAL STYLES */
+.modal-overlay { position: fixed; inset: 0; background: rgba(15,15,40,0.55); display: flex; align-items: center; justify-content: center; z-index: 100; padding: 1rem; backdrop-filter: blur(2px); }
+.modal-box { background: #fff; border-radius: 18px; width: 100%; max-width: 480px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); font-family: 'Poppins', sans-serif; overflow: hidden; display: flex; flex-direction: column; max-height: 90vh; }
+.reset-box { max-width: 650px; border-top: 5px solid #16a34a; }
 
-/* ===== MODALS ===== */
-.modal-overlay { position: fixed; inset: 0; background: rgba(15,15,40,0.55); display: flex; align-items: center; justify-content: center; z-index: 50; padding: 1rem; backdrop-filter: blur(2px); }
-.modal-box { background: #fff; border-radius: 18px; width: 100%; max-width: 440px; box-shadow: 0 24px 64px rgba(0,0,0,0.18); font-family: 'Poppins', sans-serif; overflow: hidden; }
 .modal-header { display: flex; justify-content: space-between; align-items: center; padding: 1.1rem 1.4rem; border-bottom: 1px solid #f0f0f8; }
 .modal-header-left { display: flex; align-items: center; gap: 0.7rem; }
-.modal-icon { width: 38px; height: 38px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.modal-title { font-size: 0.92rem; font-weight: 600; color: #1e1d4c; }
-.modal-sub { font-size: 0.73rem; color: #9ca3af; margin-top: 1px; }
-.close-btn { background: #f5f5fb; border: none; border-radius: 8px; color: #9ca3af; cursor: pointer; padding: 7px; display: flex; align-items: center; transition: all 0.15s; }
-.close-btn:hover { background: #f0f0f0; color: #374151; }
+.modal-icon { width: 40px; height: 40px; border-radius: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+.reset-icon { background: #f0fdf4; color: #22c55e; }
+.modal-title { font-size: 1rem; font-weight: 600; color: #1e1d4c; }
+.modal-sub { font-size: 0.75rem; color: #9ca3af; }
 
-.modal-body { padding: 1.1rem 1.4rem; display: flex; flex-direction: column; gap: 1rem; }
-.info-box { background: #f5f5fb; border: 1px solid #e8e8f0; border-radius: 10px; padding: 0.85rem 1rem; }
-.info-label { font-size: 0.68rem; font-weight: 600; color: #9ca3af; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
-.info-value { font-size: 1.4rem; font-weight: 700; color: #1e1d4c; }
-.info-unit { font-size: 0.85rem; color: #9ca3af; font-weight: 400; }
+.modal-body { padding: 1.5rem; display: flex; flex-direction: column; gap: 1.2rem; overflow-y: auto; flex: 1; }
+.reset-desc { font-size: 0.85rem; color: #4b5563; line-height: 1.5; }
 
 .form-group { display: flex; flex-direction: column; gap: 5px; }
-label { font-size: 0.8rem; font-weight: 600; color: #3E3D90; text-transform: uppercase; letter-spacing: 0.3px; }
-input[type="text"], input[type="number"], select { padding: 0.65rem 0.9rem; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.875rem; outline: none; background: #fff; color: #374151; box-sizing: border-box; width: 100%; transition: border-color 0.2s, box-shadow 0.2s; }
-input:focus, select:focus { border-color: #3E3D90; box-shadow: 0 0 0 3px rgba(62,61,144,0.1); }
-input::placeholder { color: #c0c0d0; }
-.hint { font-size: 0.72rem; color: #b0b0c8; }
+label { font-size: 0.75rem; font-weight: 600; color: #3E3D90; text-transform: uppercase; letter-spacing: 0.5px; }
+textarea, input { padding: 0.75rem 1rem; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.875rem; outline: none; transition: border-color 0.2s; }
+textarea { min-height: 80px; resize: none; }
+input:focus, textarea:focus { border-color: #3E3D90; }
 
-.preview-box { background: #f0f0fb; border: 1.5px solid #ddddfb; border-radius: 10px; padding: 0.85rem 1rem; }
-.preview-label { font-size: 0.68rem; font-weight: 600; color: #3E3D90; text-transform: uppercase; letter-spacing: 0.6px; margin-bottom: 4px; }
-.preview-value { font-size: 1.4rem; font-weight: 700; color: #1e1d4c; }
-.preview-unit { font-size: 0.85rem; color: #6b7280; font-weight: 400; }
+.replacement-section { background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 12px; padding: 1rem; margin-top: 0.5rem; }
+.replacement-header { font-size: 0.7rem; font-weight: 700; color: #3E3D90; text-transform: uppercase; margin-bottom: 0.75rem; display: flex; align-items: center; gap: 5px; }
+.grid-form { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
 
-.modal-footer { display: flex; justify-content: flex-end; gap: 0.65rem; padding: 1rem 1.4rem; border-top: 1px solid #f0f0f8; }
-.btn-cancel { padding: 0.6rem 1.1rem; background: #fff; border: 1.5px solid #e8e8f0; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 500; color: #6b7280; cursor: pointer; transition: all 0.15s; }
-.btn-cancel:hover { background: #f5f5fb; }
-.btn-submit { display: flex; align-items: center; gap: 6px; padding: 0.6rem 1.1rem; background: #3E3D90; border: none; border-radius: 10px; font-family: 'Poppins', sans-serif; font-size: 0.82rem; font-weight: 600; color: #fff; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: background 0.15s, transform 0.1s; }
-.btn-submit:hover { background: #4c4bb0; transform: translateY(-1px); }
+.modal-footer { display: flex; justify-content: flex-end; gap: 0.75rem; padding: 1.1rem 1.4rem; border-top: 1px solid #f0f0f8; }
+.btn-cancel { padding: 0.6rem 1.2rem; background: #fff; border: 1.5px solid #e8e8f0; border-radius: 10px; font-weight: 500; cursor: pointer; color: #6b7280; transition: all 0.15s; }
+.btn-submit { padding: 0.6rem 1.2rem; background: #3E3D90; color: #fff; border: none; border-radius: 10px; font-weight: 600; cursor: pointer; box-shadow: 0 4px 12px rgba(62,61,144,0.3); transition: all 0.15s; }
+.reset-submit { background: #16a34a; box-shadow: 0 4px 12px rgba(22,163,74,0.3); }
+.reset-submit:hover { background: #15803d; }
 
-.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.2s ease; }
+.modal-fade-enter-active, .modal-fade-leave-active { transition: opacity 0.3s ease; }
 .modal-fade-enter, .modal-fade-leave-to { opacity: 0; }
 
-/* ===== RESPONSIVE ===== */
-@media (max-width: 900px) {
-  .topbar { flex-wrap: wrap; gap: 0.75rem; }
-  .km-card { min-width: auto; }
-}
-
 @media (max-width: 768px) {
-  .topbar {
-    padding: 0.85rem 1rem 0.85rem 4rem;
-    flex-wrap: wrap;
-    gap: 0.75rem;
-  }
-  .page-title { font-size: 1.05rem; }
+  .topbar { padding: 0 1rem; height: auto; padding-top: 1rem; padding-bottom: 1rem; flex-direction: column; align-items: flex-start; }
+  .km-card { width: 100%; box-sizing: border-box; }
   .content-body { padding: 1rem; }
-  .section-header {
-    flex-direction: column;
-    align-items: flex-start;
-    padding: 0.85rem 1rem;
-    gap: 0.65rem;
-  }
-  .section-actions {
-    width: 100%;
-    justify-content: space-between;
-  }
-  .filter-tabs { flex-wrap: wrap; }
-  .search-row { padding: 0.75rem 1rem; }
-  .search-wrap { max-width: 100%; }
-  .component-item { padding: 0.85rem 1rem; gap: 0.75rem; }
-  .comp-name { font-size: 0.82rem; }
-}
-
-@media (max-width: 480px) {
-  .topbar { padding: 0.75rem 0.75rem 0.75rem 3.5rem; }
-  .topbar-left { gap: 0.6rem; }
-  .page-title { font-size: 0.95rem; }
-  .vehicle-title-row { flex-wrap: wrap; gap: 0.4rem; }
-  .km-card { padding: 0.55rem 0.85rem; }
-  .km-value { font-size: 1.15rem; }
-  .btn-primary { padding: 0.45rem 0.75rem; font-size: 0.75rem; }
-  .btn-primary svg { display: none; }
-  .comp-icon { width: 32px; height: 32px; }
-  .comp-actions .icon-btn { width: 26px; height: 26px; }
-  .filter-tab { padding: 0.25rem 0.55rem; font-size: 0.72rem; }
-  .modal-box { border-radius: 14px; margin: 0.5rem; }
+  .section-actions { width: 100%; justify-content: space-between; }
+  .filter-tabs { max-width: 100%; }
 }
 </style>
